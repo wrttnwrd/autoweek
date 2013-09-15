@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek Company.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function aws_company_help($path, $arg) {
+    switch($path) {
+        case 'admin/help#aws_company':{
+            $ret_val = '<h3>' . t('About') . '</h3>';
+            $ret_val .= '<p>' . t('The AWS Company module is used to manage the custom Autoweek Company content type.') . '</p>';
+            return $ret_val;
+            break;
+        }
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function aws_company_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'aws_company_node_form':{
+            $form['#validate'][] = 'aws_company_node_form_validate';
+            break;
+        }
+    }
+}
+
+/**
+ * Validates Autoweek Company content type.
+ */
+function aws_company_node_form_validate($form, &$form_state) {
+    
+}
+
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function aws_company_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}

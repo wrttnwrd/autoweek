@@ -1,0 +1,5 @@
+name = AW Paragraph
+description = Provides field type for paragraph data.
+core = 7.x
+version = 7.x-0.3-dev
+package = Autoweek

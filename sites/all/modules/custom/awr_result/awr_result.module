@@ -1,0 +1,508 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek Racing Result.  Includes event result manager.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function awr_result_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#awr_result': {
+                $ret_val = '<h3>' . t('About') . '</h3>';
+                $ret_val .= '<p>' . t('The AWR Result module is used to manage the custom Autoweek Racing Result content type.') . '</p>';
+                return $ret_val;
+                break;
+            }
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function awr_result_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'awr_result_node_form': {
+                $form['#validate'][] = 'awr_result_node_form_validate';
+                break;
+            }
+    }
+}
+
+/**
+ * Validates Autoweek Racing Result content type.
+ */
+function awr_result_node_form_validate($form, &$form_state) {
+
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function awr_result_ctools_plugin_api($module, $api) {
+    if ($module == 'field_group' && $api == 'field_group') {
+        return array('version' => 1);
+    }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function awr_result_menu() {
+    $items = array();
+    $items['raceadmin'] = array(
+        'title' => 'Event Results Manager',
+        'page callback' => 'awr_result_admin',
+        'access callback' => TRUE,
+    );
+    return $items;
+}
+
+/**
+ * Race Results Admin Page
+ */
+function awr_result_admin() {
+    $ret = '';          //Returned Page
+    $eventID = '';      //Selected Event Node ID
+    $eventVID = '';      //Selected Event Version ID
+    $page = '0';          //Event Listings Page
+    $pageSize = '10';     //Number of Results per Page
+    $classID = '';    //Series - Class ID
+    $season = date('Y');    //Season
+    //Grab Query String Variables
+    if (isset($_GET['nid'])) {
+        $eventID = $_GET['nid'];
+    }
+    if (isset($_GET['vid'])) {
+        $eventVID = $_GET['vid'];
+    }
+    if (isset($_GET['page'])) {
+        $page = $_GET['page'];
+    }
+    if (isset($_GET['pgs'])) {
+        $pageSize = $_GET['pgs'];
+    }
+    if (isset($_GET['c'])) {
+        $classID = $_GET['c'];
+    }
+    if (isset($_GET['s'])) {
+        $season = $_GET['s'];
+    }
+
+    $ret = $ret . _awr_result_buildPageOptions($classID, $pageSize, $season);
+
+    //Make sure there is no post data
+    if (empty($_POST['event_id'])) {
+        if (empty($_GET['nid']) && empty($_GET['vid'])) {
+            //No event selected, display listing of events based on class
+            $ret = $ret . _awr_result_buildEventsDisplay($classID, $pageSize, $season);
+        } else {
+            //Event probably selected.  Try to find node and build out edit page
+            $ret = $ret . _awr_result_buildSingleEventDisplay($eventID, $eventVID);
+        }
+    } else {
+        //If there is post data, update the given result
+        $ret = $ret . "<div>Somehow POST Data</div>";
+        $eventID = $_POST['event_id'];
+        unset($_POST['event_id']);
+        unset($_POST['type']);
+
+        foreach ($_POST as $pd) {
+            if ($pd['nid'] != '' && $pd['rank'] != '') {
+                $command = $pd['type'];
+                if ($command == 'addResults') {
+                    $node = new stdClass(); //new node for result
+                    $node->type = 'awr_result';
+                    node_object_prepare($node);  //setup defaults
+                    $node->title = "Race Result " . $eventID . " - " . $pd['nid']; //set title to event id + driver id
+                    $node->language = LANGUAGE_NONE; // default langugage
+                    $node->awr_result_driver[$node->language][0]['target_id'] = $pd['nid']; //set driver id reference
+                    $node->awr_result_event[$node->language][0]['target_id'] = $eventID; //set event id reference
+                    $node->awr_result_race_rank[$node->language][0]['value'] = $pd['rank']; //set rank
+                    $node->awr_result_points[$node->language][0]['value'] = $pd['points']; //set points
+                    $node->awr_result_laps[$node->language][0]['value'] = $pd['laps']; //set laps
+                    $node->awr_result_starting[$node->language][0]['value'] = $pd['starting']; //set starting position
+                    $node->awr_result_result[$node->language][0]['value'] = $pd['status']; //set result / status
+                    $node->path['pathauto'] = FALSE;
+
+                    //save node
+                    if ($node = node_submit($node)) {
+                        node_save($node);
+                        $ret = $ret . '<div>' . print_r($pd, true) . '</div>';
+                    }
+                }
+            }
+        }
+    }
+
+    //Setup Page JavaScript
+    drupal_add_js(
+            array(
+        'awr_result_manager' => array(
+            'event_id' => $eventID,
+            'event_v_id' => $eventVID,
+            'page' => $page,
+            'page_size' => $pageSize,
+            'season' => $season,
+            'class_id' => $classID,
+            'status_list' => array('Brakes', 'Crash', 'Driveshaft', 'Electrical', 'Engine', 'Gearbox', 'Hydraulics', 'Mechanical', 'Running Gear', 'Running', 'Suspension'),
+        ),
+            ), 'setting'
+    );
+    drupal_add_js(drupal_get_path('module', 'awr_result') . '/awr_result.manager.js');
+    drupal_add_js(drupal_get_path('module', 'awr_result') . '/jquery.stickytableheaders.js');
+
+    //Setup Page CSS
+    drupal_add_css(drupal_get_path('module', 'awr_result') . '/awr_result.manager.css');
+
+
+
+    //Return the built page
+    return $ret;
+}
+
+/**
+ * Query database and return HTML formatted class picker and other page options.
+ * @param INT $selected - ID of selected class
+ * @param INT $pageSize - Results per page
+ * @param INT $season - Year of selected season
+ * @return string
+ */
+function _awr_result_buildPageOptions($selected, $pageSize, $season) {
+    $po = ''; //Page Options HTML
+    $pageSizes = array(10, 25, 50, 75, 100, 150, 250);
+
+    //Series - Class Selector
+    $classQuery = new EntityFieldQuery();
+    $classQuery->entityCondition('entity_type', 'taxonomy_term');
+    $classQuery->propertyCondition('vid', 4);  //Limit to the vocabulary 'Racing Series'
+    $classes = $classQuery->execute();
+    $po = $po . '<div class="seriesWrapper"><select id="seriesSelector">';
+    if ($selected == 0) {
+        $po = $po . '<option value="0" selected>All Series</option>';
+    } else {
+        $po = $po . '<option value="0">All Series</option>';
+    }
+    foreach ($classes['taxonomy_term'] as $class) {
+        $classTaxonomy = taxonomy_term_load($class->tid);
+        if ($selected == $class->tid) {
+            $po = $po . '<option value="' . $class->tid . '" selected>' . $classTaxonomy->name . '</option>';
+        } else {
+            $po = $po . '<option value="' . $class->tid . '">' . $classTaxonomy->name . '</option>';
+        }
+    }
+    $po = $po . '</select></div>';
+
+
+    //Page Size Selector
+    $po = $po . '<div class="pageSizeWrapper"><select id="pageSizeSelector">';
+    foreach ($pageSizes as $ps) {
+        $po = ($po . '<option value="' . $ps . '"') . (($pageSize == $ps) ? ' selected' : '') . ('>' . $ps . '</option>');
+    }
+    $po = $po . '</select></div>';
+
+
+    //Racing Season Selector
+    $po = $po . '<div class="seasonWrapper"><select id="seasonSelector">';
+    $rsResult = db_query('SELECT DISTINCT `awr_event_season_value` as `value` FROM `field_data_awr_event_season` ORDER BY `value` ASC')->fetchAll();
+    foreach ($rsResult as $year) {
+        $y = date("Y", strtotime($year->value));
+        $po = ($po . '<option value="' . $y . '"') . (($season == $y) ? ' selected' : '') . ('>' . $y . '</option>');
+    }
+    $po = $po . '</select></div>';
+
+    return $po;
+}
+
+/**
+ * Query database and return HTML formatted event listing
+ * @param INT $classID - ID of selected class
+ * @param INT $pageSize - number of results per page
+ * @return string
+ */
+function _awr_result_buildEventsDisplay($classID, $pageSize, $season) {
+    $ed = ''; //Event Display HTML
+    $dateFormat = "m/d/Y @ h:ia";
+
+    $eventQuery = new EntityFieldQuery();
+    $eventQuery->entityCondition('entity_type', 'node');
+    $eventQuery->propertyCondition('type', array('awr_event'));
+    $eventQuery->fieldCondition('awr_event_season', 'value', $season, '=');
+    if ($classID && $classID != 0) {
+        $eventQuery->fieldCondition('awr_event_class', 'tid', $classID);
+    }
+    $eventQuery->fieldOrderBy('awr_event_season', 'value', 'DESC');
+    $eventQuery->fieldOrderBy('awr_event_start', 'value', 'ASC');
+    $eventQuery->pager($pageSize);
+    $eventsResult = $eventQuery->execute();
+
+
+    if (sizeOf($eventsResult) > 0) {
+        $events = $eventsResult['node'];
+
+        $ed = $ed . theme('pager');
+        $ed = $ed . "
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Series</th>
+                    <th>Season</th>
+                    <th>Title</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Select</th>
+                    <th>Calc. Stats</th>
+                </tr>";
+
+        foreach ($events as $event) {
+            $node = node_load($event->nid, $event->vid);
+            $lang = $node->language;
+            $classID = _awr_result_retprop($node->awr_event_class, $lang, 'tid');
+            $class = taxonomy_term_load($classID);
+            $ed = $ed . '
+                <tr>
+                    <td>' . $node->nid . '</td>
+                    <td>' . $class->name . '</td>
+                    <td>' . _awr_result_retprop($node->awr_event_season, $lang, 'value') . '</td>
+                    <td>' . $node->title . '</td>
+                    <td>' . date($dateFormat, strtotime(_awr_result_retprop($node->awr_event_start, $lang, 'value'))) . '</td>
+                    <td>' . date($dateFormat, strtotime(_awr_result_retprop($node->awr_event_end, $lang, 'value'))) . '</td>
+                    <td><span class="selectEvent" nid="' . $event->nid . '" vid="' . $event->vid . '">Edit</span></td>
+                    <td></td>
+                </tr>';
+        }
+        $ed = $ed . '</table>';
+        $ed = $ed . theme('pager');
+    } else {
+        $ed = $ed . "<div>No events to display.";
+    }
+
+
+
+    return $ed;
+}
+
+/**
+ * Query database and return HTML formatted string with page contents
+ * @param type $nid - Event node id
+ * @param type $vid - Event node version id
+ * @return string - HTML formatted page contents
+ */
+function _awr_result_buildSingleEventDisplay($nid, $vid) {
+    $ed = _awr_result_buildNascarControl();
+    $dateFormat = "m/d/Y @ h:ia";
+
+    if (isset($nid) && isset($vid)) {
+        $eventNode = node_load($nid, $vid);
+        $lang = $eventNode->language;
+        $season = _awr_result_retprop($eventNode->awr_event_season, $lang, 'value');
+        $classID = _awr_result_retprop($eventNode->awr_event_class, $lang, 'tid');
+        $class = taxonomy_term_load($classID);
+
+        $ed = $ed . '
+            <div class="eventDataWrapper">
+                <h3>' . $eventNode->title . '</h3>
+                <table class="eventDataTable">
+                    <tbody>
+                        <tr>
+                            <td>Created</td>
+                            <td>' . date($dateFormat, $eventNode->created) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Last Revision</td>
+                            <td>' . date($dateFormat, $eventNode->revision_timestamp) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Last Revision Comment</td>
+                            <td>' . $eventNode->log . '</td>
+                        </tr>
+                        <tr>
+                            <td>Class</td>
+                            <td>' . $class->name . '</td>
+                        </tr>
+                        <tr>
+                            <td>Channel</td>
+                            <td>' . _awr_result_retprop($eventNode->awr_event_channel, $lang, 'value') . '</td>
+                        </tr>
+                        <tr>
+                            <td>Start</td>
+                            <td>' . date($dateFormat, strtotime(_awr_result_retprop($eventNode->awr_event_start, $lang, 'value'))) . '</td>
+                        </tr>
+                        <tr>
+                            <td>End</td>
+                            <td>' . date($dateFormat, strtotime(_awr_result_retprop($eventNode->awr_event_end, $lang, 'value'))) . '</td>
+                        </tr>
+                        <tr>
+                            <td>Season</td>
+                            <td>' . $season . '</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+';
+        // Check for results for this event
+        $resultQuery = new EntityFieldQuery();
+        $resultQuery->entityCondition('entity_type', 'node');
+        $resultQuery->propertyCondition('type', array('awr_result'));
+        $resultQuery->fieldCondition('awr_result_event', 'target_id', $nid);
+
+        $driverResults = array();
+        $resultResult = $resultQuery->execute();
+        if (count($resultResult) > 0) {
+            $raceResults = $resultResult['node'];
+            foreach ($raceResults as $raceResult) {
+                $resultNode = node_load($raceResult->nid, $raceResult->vid);
+                $driverResults[_awr_result_retprop($resultNode->awr_result_driver, $lang, 'target_id')] = array(
+                    'nid' => $raceResult->nid,
+                    'vid' => $raceResult->vid,
+                    'rank' => _awr_result_retprop($resultNode->awr_result_race_rank, $lang, 'value'),
+                    'points' => _awr_result_retprop($resultNode->awr_result_points, $lang, 'value'),
+                    'starting' => _awr_result_retprop($resultNode->awr_result_starting, $lang, 'value'),
+                    'laps' => _awr_result_retprop($resultNode->awr_result_laps, $lang, 'value'),
+                    'status' => _awr_result_retprop($resultNode->awr_result_result, $lang, 'value')
+                );
+            }
+        }
+        $ed = $ed . _awr_result_buildDriversList($nid, $lang, $classID, $driverResults);
+
+        $ed = $ed . '</form>';
+    }
+    return $ed;
+}
+
+function _awr_result_buildDriversList($nid, $lang, $classID, $driverResults) {
+    $dd = '';
+    $driversData = array();
+
+    $driverQuery = new EntityFieldQuery();
+    $driverQuery->entityCondition('entity_type', 'node');
+    $driverQuery->propertyCondition('type', array('awr_driver'));
+    //$driverQuery->fieldCondition('awr_driver_season','value', $season, '=');
+    if ($classID && $classID != 0) {
+        $driverQuery->fieldCondition('awr_driver_class', 'tid', $classID);
+    }
+    $driverResult = $driverQuery->execute();
+    $classDrivers = $driverResult['node'];
+
+    $dd = $dd . '
+            <input type="hidden" name="event_id" value="' . $nid . '"></input>
+            <div id="drivers">
+                <table class="driversTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Team</th>
+                            <th class="entryCell">Set Rank</th>
+                            <th class="entryCell">Rank</th>
+                            <th class="entryCell">Points</th>
+                            <th class="entryCell">Starting<br/>Position</th>
+                            <th class="entryCell">Completed<br/>Laps</th>
+                            <th class="entryCell">Status</th>
+                            <th class="entryCell">Clear</th>
+                        </tr>
+                    </thead>';
+
+    foreach ($classDrivers as $classDriver) {
+        $driver = node_load($classDriver->nid, $classDriver->vid);
+        $driverBio = node_load($driver->awr_driver_bio_ref[$driver->language][0]['target_id']);
+        $driverInfo = array(
+            'nid' => $driver->nid,
+            'firstName' => _awr_result_retprop($driverBio->awr_driver_bio_first_name, $lang, 'value'),
+            'lastName' => _awr_result_retprop($driverBio->awr_driver_bio_last_name, $lang, 'value'),
+            'number' => _awr_result_retprop($driver->awr_driver_number, $lang, 'value'),
+            'team' => _awr_result_retprop($driver->awr_driver_team, $lang, 'value'),
+        );
+
+        array_push($driversData, $driverInfo);
+    }
+
+
+    foreach ($driversData as $key => $row) {
+        $lastName[$key] = $row['lastName'];
+        $firstName[$key] = $row['firstName'];
+    }
+
+    // Sort the data with volume descending, edition ascending
+    // Add $data as the last parameter, to sort by the common key
+    array_multisort($lastName, SORT_ASC, $firstName, SORT_ASC, $driversData);
+
+    $c = 0;
+
+    foreach ($driversData as $driverData) {
+        if ($c % 2) {
+            $dd = $dd . '<tr class="odd">';
+        } else {
+            $dd = $dd . '<tr class="even">';
+        }
+
+        if (isset($driverResults[$driverData['nid']])) {
+            $dd = $dd . '
+                        <td>' . $driverData['nid'] . '</td>
+                        <td id="fn' . $driverData['nid'] . '">' . $driverData['firstName'] . '</td>
+                        <td id="ln' . $driverData['nid'] . '">' . $driverData['lastName'] . '</td>
+                        <td>' . $driverData['team'] . '</td>
+                        <td class="entryCell">
+                            <input type="hidden" nid="' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[type]" value="updateResults"></input>
+                            <input type="hidden" nid="' . $driverData['nid'] . '" id="nid' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[nid]" value="' . $driverData['nid'] . '"></input>
+                            <button class="setRank" type="button" nid="' . $driverData['nid'] . '">SET</button>
+                        </td>
+                        <td class="entryCell"><input type="text" nid="' . $driverData['nid'] . '" id="rb' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[rank]" class="resultBox rankBox" value="' . $driverResults[$driverData['nid']]['rank'] . '"></input></td>
+                        <td class="entryCell"><input type="text" nid="' . $driverData['nid'] . '" id="pb' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[points]" class="resultBox pointsBox" value="' . $driverResults[$driverData['nid']]['points'] . '"></input></td>
+                        <td class="entryCell"><input type="text" nid="' . $driverData['nid'] . '" id="strt' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[starting]" class="resultBox startingBox" value="' . $driverResults[$driverData['nid']]['starting'] . '"></input></td>
+                        <td class="entryCell"><input type="text" nid="' . $driverData['nid'] . '" id="cl' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[laps]" class="resultBox lapsBox" value="' . $driverResults[$driverData['nid']]['laps'] . '"></input></td>
+                        <td class="entryCell"><div class="statusBox"><input type="text" nid="' . $driverData['nid'] . '" id="stus' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[status]" class="statusBox form-autocomplete" value="' . $driverResults[$driverData['nid']]['status'] . '"></input></div></td>
+                        <td class="entryCell"><button id="clear' . $driverData['nid'] . '" class="clear" type="button" nid="' . $driverData['nid'] . '">X</button></td>
+                    </tr>';
+        } else {
+            $dd = $dd . '
+                        <td>' . $driverData['nid'] . '</td>
+                        <td id="fn' . $driverData['nid'] . '">' . $driverData['firstName'] . '</td>
+                        <td id="ln' . $driverData['nid'] . '">' . $driverData['lastName'] . '</td>
+                        <td>' . $driverData['team'] . '</td>
+                        <td class="entryCell">
+                            <input type="hidden" nid="' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[type]" value="addResults"></input>
+                            <input type="hidden" nid="' . $driverData['nid'] . '" id="nid' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[nid]" value="' . $driverData['nid'] . '"></input>
+                            <button class="setRank" type="button" nid="' . $driverData['nid'] . '">SET</button>
+                        </td>
+                        <td class="entryCell"><input type="text" nid="' . $driverData['nid'] . '" id="rb' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[rank]" class="resultBox rankBox"></input></td>
+                        <td class="entryCell"><input type="text" nid="' . $driverData['nid'] . '" id="pb' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[points]" class="resultBox pointsBox disabled"></input></td>
+                        <td class="entryCell"><input type="text" nid="' . $driverData['nid'] . '" id="strt' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[starting]" class="resultBox startingBox disabled"></input></td>
+                        <td class="entryCell"><input type="text" nid="' . $driverData['nid'] . '" id="cl' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[laps]" class="resultBox lapsBox disabled"></input></td>
+                        <td class="entryCell"><div class="statusBox"><input type="text" nid="' . $driverData['nid'] . '" id="stus' . $driverData['nid'] . '" name="' . $driverData['nid'] . '[status]" class="statusBox disabled form-autocomplete"></input></div></td>
+                        <td class="entryCell"><button id="clear' . $driverData['nid'] . '" class="clear disabled" type="button" nid="' . $driverData['nid'] . '">X</button></td>
+                    </tr>';
+        }
+        $c++;
+    }
+    $dd = $dd . '</table></div>';
+
+    return $dd;
+}
+
+/*
+ * Return a given property/languag/value combo if it's exists.  otherwise return an empty string.
+ */
+
+function _awr_result_retprop($arr, $lang, $val) {
+    return isset($arr[$lang][0][$val]) ? $arr[$lang][0][$val] : "";
+}
+
+function _awr_result_buildNascarControl() {
+    $ctrl =
+            '<form name="driverResults" action="/?q=raceadmin" method="post">
+            <div class="floater">
+                <div class="floaterHeader">NASCAR Sprint Cup</div>
+                <div class="floaterBody"></div>
+                <div class="floaterFooter"><input type="submit" value="Submit Results"></div>';
+
+
+
+    $ctrl = $ctrl . '</div>';
+
+    return $ctrl;
+}
+

@@ -1,0 +1,84 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek Issue.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function aw_issue_help($path, $arg) {
+    switch($path) {
+        case 'admin/help#aw_issue':{
+            $ret_val = '<h3>' . t('About') . '</h3>';
+            $ret_val .= '<p>' . t('The AW Issue module is used to manage the custom Autoweek Issue content type.') . '</p>';
+            return $ret_val;
+            break;
+        }
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function aw_issue_form_alter(&$form, &$form_state, $form_id) {
+
+    switch ($form_id) {
+        case 'aw_issue_node_form':{
+            $form['#validate'][] = '_aw_issue_node_form_validate';
+            break;
+        }
+    }
+}
+
+/**
+ * Custom Validation Function.
+ * Validates Autoweek Issue content type.
+ */
+function _aw_issue_node_form_validate($form, &$form_state) {
+
+    //Set current operation
+    $currOp = $form_state['values']['op'];
+
+    //If not deleting, validate
+    if($currOp != "Delete"){
+        
+        //Validate that exactly 5 headline/PDFs populated.
+        $headlineArr = $form_state['values']['aw_issue_headline'][LANGUAGE_NONE];
+        $pdfArr = $form_state['values']['aw_issue_file'][LANGUAGE_NONE];
+        $totalCount = 0;
+
+        //Add to total set via headline text field
+        for($i=0; $i<=4; $i++){
+            if(isset($headlineArr[$i]['value']) && $headlineArr[$i]['value']!= ''){
+                $totalCount += 1;
+            }
+        }
+
+        //Add to total set via PDF field
+        $countPDF = count($pdfArr);
+        $maxPDFIndex = $countPDF - 1;
+
+        for($i=0; $i<=$maxPDFIndex; $i++){
+            if(isset($pdfArr[$i]['fid']) && $pdfArr[$i]['fid']!= 0){
+                $totalCount += 1;
+            }
+        }
+
+        //Validate: exactly 5 set. If more/less, throw error.
+        if($totalCount != 5){
+            form_set_error('aw_issue_headline', t('You must enter exactly 5 entries from text headlines and PDFs (combined). You currently have '. $totalCount .' entered/attached.'));
+            form_set_error('aw_issue_file');
+        }
+    }
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function aw_issue_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}

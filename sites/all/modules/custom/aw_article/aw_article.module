@@ -1,0 +1,23 @@
+<?php
+/*
+ * @file article.module
+ * 
+ * Provides interface to manage article-like content. 
+ */
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function aw_article_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}
+
+function aw_article_form_alter(&$form, &$form_state, $form_id) {
+  $curr_form = $form_id;
+  if($curr_form == "aw_article_node_form"){
+    unset($form['aw_article_content'][LANGUAGE_NONE]['actions']['bundle']['#options']['aw_article']);
+    unset($form['aw_article_content'][LANGUAGE_NONE]['actions']['bundle']['#options']['aw_gallery']);
+  }
+}

@@ -1,0 +1,225 @@
+<?php
+
+/**
+ * @file
+ * Autoweek Issue installation
+ */
+
+/**
+ * Implements hook_install().
+ */
+function aw_issue_install() {
+    
+    //Get localization function for installation as t() may be unavailable.
+    $t = get_t();
+        
+    // Content type definition.
+    $content_type = array(
+        'type' => 'aw_issue',
+        'name' => $t('Autoweek Issue'),
+        'description' => $t('An Autoweek Issue.'),
+        'title_label' => $t('Issue name'),
+        'base' => 'node_content',
+        'custom' => TRUE,
+    );
+    
+    // Set remaining definitions with defaults.
+    $node_type = node_type_set_defaults($content_type);
+    
+    // Save the content type
+    node_type_save($node_type);
+    
+    // Add a field for the body
+    //node_add_body_field($node_type, $t('Description'));
+    
+    // Create fields.
+    $fields = array();
+    
+    $fields['aw_issue_cover'] = array(
+        'field_name' => 'aw_issue_cover',
+        'type' => 'image',
+    );
+    $fields['aw_issue_date'] = array(
+        'field_name' => 'aw_issue_date',
+        'type' => 'date',
+        'settings' => array(
+            'granularity' => array(
+                'year' => 'year',
+                'month' => 'month',
+                'day' => 'day',
+            ),
+        ),
+    );
+    
+    //start group 1
+    $fields['aw_issue_headline'] = array(
+        'field_name' => 'aw_issue_headline',
+        'type' => 'text',
+        'cardinality' => 5,
+    );
+    $fields['aw_issue_file'] = array(
+        'field_name' => 'aw_issue_file',
+        'type' => 'file',
+        'cardinality' => 5,
+    );
+    
+    foreach ($fields as $field) {
+        field_create_field($field);
+    }
+    
+    // Create field instances.
+    $instances = array();
+    
+    $instances['aw_issue_cover'] = array(
+        'field_name' => 'aw_issue_cover',
+        'label' => $t('Upload cover image'),
+        'required' => TRUE,
+        'settings' => array(
+            'title_field' => TRUE,
+            'alt_field' => TRUE,
+            'alt_field_default' => '[node:title] Autoweek Magazine Cover',
+            'title_field_default' => '[node:title] Autoweek Magazine Cover',
+        ),
+        'display' => array(
+            'default' => array(
+                'settings' => array(
+                    'image_style' => 'aw-issue-cover',
+                ),
+                'weight' => 0,
+            ),
+        ),
+    );
+    $instances['aw_issue_date'] = array(
+        'field_name' => 'aw_issue_date',
+        'label' => $t('Issue Date'),
+        'required' => TRUE,
+        'description' => $t('Issue Date. MM/DD/YYYY'),
+        'widget' => array(
+            'type' => 'date_text',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+            'default_value' => 'blank',
+        ),
+    );
+    
+    //start group 1
+    $instances['aw_issue_headline'] = array(
+        'field_name' => 'aw_issue_headline',
+        'label' => $t('Text Headline'),
+        'description' => $t('Enter the text headlines. NOTE: total of 5 entries (between text headlines and PDFs) allowed.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['aw_issue_file'] = array(
+        'field_name' => 'aw_issue_file',
+        'label' => $t('PDF upload'),
+        'description' => $t('Upload issue PDFs here. NOTE: total of 5 entries (between text headlines and PDFs) allowed.'),
+        'required' => FALSE,
+        'settings' => array(
+            'file_extensions' => 'pdf',
+            'description_field' => 1,
+        ),
+    );
+    
+    foreach ($instances as $instance) {
+        $instance['entity_type'] = 'node';
+        $instance['bundle'] = 'aw_issue';
+        field_create_instance($instance);
+    }
+    
+    //Call function to create styles.
+    $style_name = array('aw-issue-cover');
+    _aw_issue_styles_create($style_name);
+}
+
+/**
+* Implements hook_uninstall().
+*/
+function aw_issue_uninstall() {
+
+    // Inform the user of the removal.
+    $t = get_t();
+    
+    //Get all node ids with aw_issue content type.
+    $sql_query = 'SELECT nid ';
+    $sql_query .= 'FROM {node} ';
+    $sql_query .= 'WHERE {node}.type = :type ';
+    $result = db_query($sql_query, array(':type' => 'aw_issue'));
+    
+    $nids = array();
+    foreach ($result as $row) {
+        $nids[] = $row->nid;
+    }
+    
+    // Delete all aw_issue content.
+    node_delete_multiple($nids);
+    drupal_set_message($t('Autoweek Issue content removed.'));
+    
+    //Remove all fields and field instances.
+    foreach (field_info_instances('node', 'aw_issue') as $field_name => $instance) {
+        field_delete_instance($instance);
+    }
+    drupal_set_message($t('Autoweek Issue fields and field instances removed.'));
+    
+    //Delete the content type.
+    node_type_delete('aw_issue');
+    drupal_set_message($t('Autoweek Issue content type removed.'));
+    
+    //Delete image styles.
+    $style_name = array('aw-issue-cover');
+    _aw_issue_styles_delete($style_name);
+    
+    //Clean up deleted fields.
+    field_purge_batch(1000);
+}
+
+/**
+* Implements function to create new image style.
+*/
+function _aw_issue_styles_create($style_name) {
+    // Create image styles.
+    foreach($style_name as $value) {
+        $style = image_style_save(array('name' => $value));
+
+        switch($value) {
+            case 'aw-issue-cover':{
+                $effect = array(
+                    'name' => 'image_scale',
+                    'data' => array(
+                      'width' => 135,
+                      'height' => 177,
+                      'upscale' => TRUE,
+                    ),
+                    'isid' => $style['isid'],
+                 );
+                break;
+            }
+        }
+        image_effect_save($effect);
+    }
+    
+    // Give user feedback.
+    $t = get_t();
+    drupal_set_message($t('Autoweek Issue styles created.'));
+    
+}
+
+/**
+* Implements function to delete image styles.
+*/
+function _aw_issue_styles_delete($style_name) {
+    // Delete image styles.
+    foreach($style_name as $value) {
+        image_style_delete(image_style_load($value));
+    }
+    
+    // Give user feedback.
+    $t = get_t();
+    drupal_set_message($t('Autoweek Issue styles deleted.'));
+    
+}

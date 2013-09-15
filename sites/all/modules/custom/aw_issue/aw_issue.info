@@ -1,0 +1,9 @@
+name = AW Issue
+description = A custom issue content type for Autoweek.
+core = 7.x
+package = Autoweek
+version = 7.x-0.1-dev
+configure = admin/config/aw_issue/manage
+dependencies[] = image
+dependencies[] = imagefield_tokens
+dependencies[] = field_group

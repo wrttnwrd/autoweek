@@ -1,0 +1,131 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek gallery.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function aw_gallery_help($path, $arg) {
+    switch($path) {
+        case 'admin/help#aw_gallery':{
+            $ret_val = '<h3>' . t('About') . '</h3>';
+            $ret_val .= '<p>' . t('The AW Gallery module is used to manage the custom Autoweek gallery content type.') . '</p>';
+            return $ret_val;
+            break;
+        }
+    }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function aw_gallery_menu(){
+    $items = array();
+    
+//Admin configuration group.
+$items['admin/config/aw_gallery'] = array(
+    'title' => 'AW Gallery',
+    'description' => 'Administer AW Gallery',
+    'access arguments' => array('administer aw gallery'),
+);
+//Admin configuration - Settings.
+$items['admin/config/aw_gallery/manage'] = array(
+    'title' => 'AW Gallery Settings',
+    'description' => 'Manage AW Gallery settings and configurations.',
+    'access arguments' => array('administer aw gallery'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('aw_gallery_admin_settings_form'),
+);
+
+return $items;
+}
+
+/**
+ * Implements hook_form().
+ */
+function aw_gallery_admin_settings_form($node, &$form_state) {
+    $form = array();
+    
+    $form['overview'] = array(
+        '#markup' => t('This interface allows administrators to manage general AW Gallery Settings'),
+        '#prefix' => '<p>',
+        '#suffix' => '</p>',
+    );
+    
+    $form['aw_gallery_test'] = array(
+        '#title' => t('Enable some test field'),
+        '#description' => t('When enabled, I will do nothing and you will like it.'),
+        '#type' => 'checkbox',
+        '#default_value' => variable_get('aw_gallery_test'),
+    );
+    
+    $form['aw_gallery_path'] = array(
+        '#title' => t('Gallery title'),
+        '#description' => t('This field holds the path to the gallery file (not including the root).'),
+        '#type' => 'textfield',
+        '#default_value' => variable_get('aw_gallery_path'),
+    );
+
+    return system_settings_form($form);
+}
+
+/**
+ * Validates Autoweek gallery admin settings.
+ */
+function aw_gallery_admin_settings_form_validate($form, &$form_state) {    
+    //shorthand for long array name
+    $imgpath = $form_state['values']['aw_gallery_path'];
+    
+    //validate gallery path format
+    if(!_aw_gallery_validate_signed_degreees($imgpath)) {
+        form_set_error('aw_gallery_path', t('Invalid gallery path: must be signed degree FOR TESTING ONLY ex. 2.3'));
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function aw_gallery_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'aw_gallery_node_form':{
+            $form['#validate'][] = 'aw_gallery_node_form_validate';
+            break;
+        }
+    }
+}
+
+/**
+ * Validates Autoweek Image content type.
+ */
+function aw_gallery_node_form_validate($form, &$form_state) {
+}
+
+
+/**
+ * Define class to support the Inline Entity Form.
+ */
+class AWGalleryInlineEntityFormController extends EntityInlineEntityFormController {
+    
+  /**
+   * Overrides EntityInlineEntityFormController::entityForm().
+   */
+  public function entityForm($entity_form, &$form_state) {
+    $entity_form['aw_gallery_slides'] = array(
+      'controller' => 'AWGalleryInlineEntityFormController',
+    );
+
+    return $entity_form;
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function aw_gallery_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}

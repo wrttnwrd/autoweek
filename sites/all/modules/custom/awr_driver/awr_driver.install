@@ -1,0 +1,649 @@
+ <?php
+
+/**
+ * @file
+ * Autoweek Racing Driver installation
+ */
+
+/**
+ * Implements hook_install().
+ */
+function awr_driver_install() {
+
+    //Get localization function for installation as t() may be unavailable.
+    $t = get_t();
+        
+    // Content type definition.
+    $content_type = array(
+        'type' => 'awr_driver',
+        'name' => $t('Racing Driver'),
+        'description' => $t('An Autoweek Racing Driver.'),
+        'title_label' => $t('Full Name'),
+        'base' => 'node_content',
+        'custom' => TRUE,
+    );
+    
+    // Set remaining definitions with defaults.
+    $node_type = node_type_set_defaults($content_type);
+    
+    // Save the content type
+    node_type_save($node_type);
+    
+    // Add a field for the body
+    //node_add_body_field($node_type, $t('Description'));
+    
+    // Create fields.
+    $fields = array();
+    
+    //Group 1 - Driver Info
+    $fields['awr_driver_bio_ref'] = array(
+        'field_name' => 'awr_driver_bio_ref',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 1,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_driver_bio' => 'awr_driver_bio',
+                ),
+            ),
+        ),
+    );
+    $fields['awr_driver_class'] = array(
+        'field_name' => 'awr_driver_class',
+        'type' => 'taxonomy_term_reference',
+        'weight' => 2,
+        'settings' => array(
+            'allowed_values' => array(
+               array(
+                'vocabulary' => 'racing_series',
+                'parent' => 0,
+               ),
+             ),
+           ),
+        'cardinality' => 1,
+    );
+    $fields['awr_driver_taxonomy'] = array(
+        'field_name' => 'awr_driver_taxonomy',
+        'type' => 'taxonomy_term_reference',
+        'weight' => 3,
+        'settings' => array(
+            'allowed_values' => array(
+               array(
+                'vocabulary' => 'taxonomy',
+                'parent' => 0,
+               ),
+             ),
+           ),
+        'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    );
+    $fields['awr_driver_number'] = array(
+        'field_name' => 'awr_driver_number',
+        'type' => 'number_integer',
+        'weight' => 4,
+    );
+    $fields['awr_driver_season'] = array(
+        'field_name' => 'awr_driver_season',
+        'type' => 'number_integer',
+        'weight' => 5,
+    );
+    $fields['awr_driver_team'] = array(
+        'field_name' => 'awr_driver_team',
+        'type' => 'text',
+        'weight' => 6,
+    );
+    
+    //Group 2 - Career Stats
+    $fields['awr_driver_finals'] = array(
+        'field_name' => 'awr_driver_finals',
+        'type' => 'number_integer',
+        'weight' => 7,
+    );
+    $fields['awr_driver_semifinals'] = array(
+        'field_name' => 'awr_driver_semifinals',
+        'type' => 'number_integer',
+        'weight' => 8,
+    );
+    $fields['awr_driver_quarterfinals'] = array(
+        'field_name' => 'awr_driver_quarterfinals',
+        'type' => 'number_integer',
+        'weight' => 9,
+    );
+    $fields['awr_driver_record'] = array(
+        'field_name' => 'awr_driver_record',
+        'type' => 'text',
+        'weight' => 10,
+    );
+    $fields['awr_driver_poles'] = array(
+        'field_name' => 'awr_driver_poles',
+        'type' => 'number_integer',
+        'weight' => 11,
+    );
+    $fields['awr_driver_wins'] = array(
+        'field_name' => 'awr_driver_wins',
+        'type' => 'number_integer',
+        'weight' => 12,
+    );    
+    $fields['awr_driver_recent_finish'] = array(
+        'field_name' => 'awr_driver_recent_finish',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 1,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_result' => 'awr_result',
+                ),
+            ),
+        ),
+    );
+    $fields['awr_driver_best_champ_finish'] = array(
+        'field_name' => 'awr_driver_best_champ_finish',
+        'type' => 'text',
+        'weight' => 14,
+    );
+    $fields['awr_driver_recent_champ_finish'] = array(
+        'field_name' => 'awr_driver_recent_champ_finish',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 1,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_result' => 'awr_result',
+                ),
+            ),
+        ),
+    );
+    $fields['awr_driver_best_career_finish'] = array(
+        'field_name' => 'awr_driver_best_career_finish',
+        'type' => 'text',
+        'weight' => 16,
+    );
+    $fields['awr_driver_top_qualifier'] = array(
+        'field_name' => 'awr_driver_top_qualifier',
+        'type' => 'text',
+        'weight' => 17,
+    );
+    $fields['awr_driver_career_round_record'] = array(
+        'field_name' => 'awr_driver_career_round_record',
+        'type' => 'text',
+        'weight' => 18,
+    );
+    $fields['awr_driver_career_best_speed'] = array(
+        'field_name' => 'awr_driver_career_best_speed',
+        'type' => 'text',
+        'weight' => 19,
+    );
+    $fields['awr_driver_career_best_time'] = array(
+        'field_name' => 'awr_driver_career_best_time',
+        'type' => 'text',
+        'weight' => 20,
+    );
+    
+    
+    
+    
+    
+
+    //Group 3 - Legacy
+    $fields['awr_driver_legacy_id'] = array(
+        'field_name' => 'awr_driver_legacy_id',
+        'type' => 'text',
+        'weight' => 21,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['awr_driver_legacy_taxid'] = array(
+        'field_name' => 'awr_driver_legacy_taxid',
+        'type' => 'text',
+        'weight' => 22,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['awr_driver_legacy_seriesid'] = array(
+        'field_name' => 'awr_driver_legacy_seriesid',
+        'type' => 'text',
+        'weight' => 23,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['awr_driver_legacy_classid'] = array(
+        'field_name' => 'awr_driver_legacy_classid',
+        'type' => 'text',
+        'weight' => 24,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    
+    //Group 4 - Calculated Stats
+    $fields['awr_driver_calc_rank'] = array(
+        'field_name' => 'awr_driver_calc_rank',
+        'type' => 'number_integer',
+        'weight' => 25,
+    );
+    $fields['awr_driver_calc_rank_change'] = array(
+        'field_name' => 'awr_driver_calc_rank_change',
+        'type' => 'number_integer',
+        'weight' => 26,
+    );
+    $fields['awr_driver_calc_points'] = array(
+        'field_name' => 'awr_driver_calc_points',
+        'type' => 'number_integer',
+        'weight' => 27,
+    );
+    $fields['awr_driver_calc_points_behind'] = array(
+        'field_name' => 'awr_driver_calc_points_behind',
+        'type' => 'number_integer',
+        'weight' => 28,
+    );
+    $fields['awr_driver_calc_starts'] = array(
+        'field_name' => 'awr_driver_calc_starts',
+        'type' => 'number_integer',
+        'weight' => 29,
+    );
+    $fields['awr_driver_calc_poles'] = array(
+        'field_name' => 'awr_driver_calc_poles',
+        'type' => 'number_integer',
+        'weight' => 30,
+    );
+    $fields['awr_driver_calc_wins'] = array(
+        'field_name' => 'awr_driver_calc_wins',
+        'type' => 'number_integer',
+        'weight' => 31,
+    );
+    $fields['awr_driver_calc_top3'] = array(
+        'field_name' => 'awr_driver_calc_top3',
+        'type' => 'number_integer',
+        'weight' => 32,
+    );
+    $fields['awr_driver_calc_top5'] = array(
+        'field_name' => 'awr_driver_calc_top5',
+        'type' => 'number_integer',
+        'weight' => 33,
+    );
+    $fields['awr_driver_calc_top10'] = array(
+        'field_name' => 'awr_driver_calc_top10',
+        'type' => 'number_integer',
+        'weight' => 34,
+    );
+    $fields['awr_driver_calculated_finals'] = array(
+        'field_name' => 'awr_driver_calculated_finals',
+        'type' => 'number_integer',
+        'weight' => 35,
+    );
+    $fields['awr_driver_calculated_sf'] = array(
+        'field_name' => 'awr_driver_calculated_sf',
+        'type' => 'number_integer',
+        'weight' => 36,
+    );
+    $fields['awr_driver_calculated_qf'] = array(
+        'field_name' => 'awr_driver_calculated_qf',
+        'type' => 'number_integer',
+        'weight' => 37,
+    );
+    
+    foreach ($fields as $field) {
+        field_create_field($field);
+    }
+    
+    // Create field instances.
+    $instances = array();
+
+    //Group 1 - Driver Info
+    $instances['awr_driver_bio_ref'] = array(
+        'field_name' => 'awr_driver_bio_ref',
+        'label' => $t('Driver Bio Reference'),
+        'description' => $t('Reference the Driver Bio.'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );
+    $instances['awr_driver_class'] = array(
+        'field_name' => 'awr_driver_class',
+        'label' => $t('Series - Class'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'options_select',
+        ),
+    );
+    $instances['awr_driver_taxonomy'] = array(
+        'field_name' => 'awr_driver_taxonomy',
+        'label' => $t('Taxonomy term'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'taxonomy_autocomplete',
+        ),
+    );
+    $instances['awr_driver_number'] = array(
+        'field_name' => 'awr_driver_number',
+        'label' => $t('Driver/Car Number'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_season'] = array(
+        'field_name' => 'awr_driver_season',
+        'label' => $t('Season'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_team'] = array(
+        'field_name' => 'awr_driver_team',
+        'label' => $t('Team'),
+        'description' => $t('Type in the driver\'s team name.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    
+    //Group 2 - Career Stats
+    $instances['awr_driver_finals'] = array(
+        'field_name' => 'awr_driver_finals',
+        'label' => $t('Finals'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_semifinals'] = array(
+        'field_name' => 'awr_driver_semifinals',
+        'label' => $t('Semi-Finals'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_quarterfinals'] = array(
+        'field_name' => 'awr_driver_quarterfinals',
+        'label' => $t('Quarter-Finals'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_record'] = array(
+        'field_name' => 'awr_driver_record',
+        'label' => $t('Round Record'),
+        'description' => $t('Type in the driver\'s round record.Format: W-L, i.e. "4-2" '),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_poles'] = array(
+        'field_name' => 'awr_driver_poles',
+        'label' => $t('Poles'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_wins'] = array(
+        'field_name' => 'awr_driver_wins',
+        'label' => $t('Wins'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_recent_finish'] = array(
+        'field_name' => 'awr_driver_recent_finish',
+        'label' => $t('Recent Finish'),
+        'description' => $t('Reference the most recent race result.'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );    
+    $instances['awr_driver_best_champ_finish'] = array(
+        'field_name' => 'awr_driver_best_champ_finish',
+        'label' => $t('Best Champ Finish'),
+        //'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_recent_champ_finish'] = array(
+        'field_name' => 'awr_driver_recent_champ_finish',
+        'label' => $t('Recent Champ Finish'),
+        'description' => $t('Reference the most recent championship result.'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );    
+    $instances['awr_driver_best_career_finish'] = array(
+        'field_name' => 'awr_driver_best_career_finish',
+        'label' => $t('Best Career Finish'),
+        //'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );    
+    $instances['awr_driver_top_qualifier'] = array(
+        'field_name' => 'awr_driver_top_qualifier',
+        'label' => $t('Top Qualifier'),
+        //'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );    
+    $instances['awr_driver_career_round_record'] = array(
+        'field_name' => 'awr_driver_career_round_record',
+        'label' => $t('Career Round Record'),
+        //'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );    
+    $instances['awr_driver_career_best_speed'] = array(
+        'field_name' => 'awr_driver_career_best_speed',
+        'label' => $t('Career Best Speed'),
+        //'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );    
+    $instances['awr_driver_career_best_time'] = array(
+        'field_name' => 'awr_driver_career_best_time',
+        'label' => $t('Career Best Time'),
+        //'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    
+    
+    //Group 3 - Legacy
+    $instances['awr_driver_legacy_id'] = array(
+        'field_name' => 'awr_driver_legacy_id',
+        'label' => $t('Legacy Driver ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_legacy_taxid'] = array(
+        'field_name' => 'awr_driver_legacy_taxid',
+        'label' => $t('Legacy Taxonomy ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_legacy_taxid'] = array(
+        'field_name' => 'awr_driver_legacy_taxid',
+        'label' => $t('Legacy Taxonomy ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_legacy_seriesid'] = array(
+        'field_name' => 'awr_driver_legacy_seriesid',
+        'label' => $t('Legacy Series ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_legacy_classid'] = array(
+        'field_name' => 'awr_driver_legacy_classid',
+        'label' => $t('Legacy Class ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    
+    //Group 4 - Calculated Stats
+    $instances['awr_driver_calc_rank'] = array(
+        'field_name' => 'awr_driver_calc_rank',
+        'label' => $t('Rank'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calc_rank_change'] = array(
+        'field_name' => 'awr_driver_calc_rank_change',
+        'label' => $t('Rank Change'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calc_points'] = array(
+        'field_name' => 'awr_driver_calc_points',
+        'label' => $t('Points'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calc_points_behind'] = array(
+        'field_name' => 'awr_driver_calc_points_behind',
+        'label' => $t('Points Behind'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calc_starts'] = array(
+        'field_name' => 'awr_driver_calc_starts',
+        'label' => $t('Starts'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calc_poles'] = array(
+        'field_name' => 'awr_driver_calc_poles',
+        'label' => $t('Poles'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calc_wins'] = array(
+        'field_name' => 'awr_driver_calc_wins',
+        'label' => $t('Wins'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calc_top3'] = array(
+        'field_name' => 'awr_driver_calc_top3',
+        'label' => $t('Top 3 Finishes'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calc_top5'] = array(
+        'field_name' => 'awr_driver_calc_top5',
+        'label' => $t('Top 5 Finishes'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calc_top10'] = array(
+        'field_name' => 'awr_driver_calc_top10',
+        'label' => $t('Top 10 Finishes'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calculated_finals'] = array(
+        'field_name' => 'awr_driver_calculated_finals',
+        'label' => $t('NHRA Final Appearances'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calculated_sf'] = array(
+        'field_name' => 'awr_driver_calculated_sf',
+        'label' => $t('NHRA Semifinal Appearances'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_driver_calculated_qf'] = array(
+        'field_name' => 'awr_driver_calculated_qf',
+        'label' => $t('NHRA Quarterfinal Appearances'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    
+    foreach ($instances as $instance) {
+        $instance['entity_type'] = 'node';
+        $instance['bundle'] = 'awr_driver';
+        field_create_instance($instance);
+    }
+}
+
+/**
+* Implements hook_uninstall().
+*/
+function awr_driver_uninstall() {
+
+    // Inform the user of the removal.
+    $t = get_t();
+    
+    //Get all node ids with awr_driver content type.
+    $sql_query = 'SELECT nid ';
+    $sql_query .= 'FROM {node} ';
+    $sql_query .= 'WHERE {node}.type = :type ';
+    $result = db_query($sql_query, array(':type' => 'awr_driver'));
+    
+    $nids = array();
+    foreach ($result as $row) {
+        $nids[] = $row->nid;
+    }
+    
+    // Delete all awr_driver content.
+    node_delete_multiple($nids);
+    drupal_set_message($t('Autoweek Racing Driver content removed.'));
+    
+    //Remove all fields and field instances.
+    foreach (field_info_instances('node', 'awr_driver') as $field_name => $instance) {
+        field_delete_instance($instance);
+    }
+    drupal_set_message($t('Autoweek Racing Driver fields and field instances removed.'));
+    
+    //Delete the content type.
+    node_type_delete('awr_driver');
+    drupal_set_message($t('Autoweek Racing Driver content type removed.'));
+        
+    //Clean up deleted fields.
+    field_purge_batch(1000);
+}

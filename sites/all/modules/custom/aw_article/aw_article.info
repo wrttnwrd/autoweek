@@ -1,0 +1,7 @@
+name = AW Article
+description = Provides interface for writing and displaying article content.
+core = 7.x
+version = 7.x-0.3-dev
+package = Autoweek
+dependencies[] = inline_entity_form
+dependencies[] = field_group

@@ -1,0 +1,138 @@
+--- entity.test
++++ entity.test
+@@ -921,10 +921,10 @@
+   /**
+    * Test using access() method.
+    */
+-  function testAccess() {
++    function testAccess() {
+     // Test without data.
+     $account = $this->drupalCreateUser(array('bypass node access'));
+-    $this->assertTrue(entity_access('view', 'node', NULL, $account), 'Access without data checked.');
++    $this->assertFalse(entity_access('view', 'node', NULL, $account), 'Access without data checked.');
+ 
+     // Test with actual data.
+     $values[LANGUAGE_NONE][0] = array('value' => '<b>2009-09-05</b>');
+@@ -935,12 +935,13 @@
+     // Test per property access without data.
+     $account2 = $this->drupalCreateUser(array('bypass node access', 'administer nodes'));
+     $wrapper = entity_metadata_wrapper('node', NULL, array('bundle' => 'page'));
+-    $this->assertTrue($wrapper->access('edit', $account), 'Access to node granted.');
++    $this->assertFalse($wrapper->access('edit', $account), 'Access to node granted.');
+     $this->assertFalse($wrapper->status->access('edit', $account), 'Access for admin property denied.');
+-    $this->assertTrue($wrapper->status->access('edit', $account2), 'Access for admin property allowed for the admin.');
++    $this->assertFalse($wrapper->status->access('edit', $account2), 'Access for admin property allowed for the admin.');
+ 
+     // Test per property access with data.
+     $wrapper = entity_metadata_wrapper('node', $node, array('bundle' => 'page'));
++    $this->assertTrue($wrapper->access('edit', $account), 'Access to exist node granted.');
+     $this->assertFalse($wrapper->status->access('edit', $account), 'Access for admin property denied.');
+     $this->assertTrue($wrapper->status->access('edit', $account2), 'Access for admin property allowed for the admin.');
+ 
+@@ -1619,3 +1620,66 @@
+     }
+   }
+ }
++
++class EntityMetadataCreateAccesTest extends EntityWebTestCase {
++
++  public static function getInfo() {
++    return array(
++      'name' => 'Metadata Create Access',
++      'description' => 'Makes sure metadata wrapper are working right.',
++      'group' => 'Entity API',
++    );
++  }
++
++  function setUp() {
++    parent::setUp('entity', 'locale');
++  }
++
++  public function testNodeWrapperCreateAccess() {
++    // Create three users. One with super-powers, one with create perms,
++    // and one with no perms.
++    $admin_account = $this->drupalCreateUser(array(
++      'bypass node access',
++    ));
++    $creator_account = $this->drupalCreateUser(array(
++      'create page content',
++    ));
++    $auth_only_account = $this->drupalCreateUser(array());
++    $node_author_account = $this->drupalCreateUser(array());
++
++    $settings = array(
++      'uid' => $node_author_account->uid,
++      'type' => 'page',
++      'title' => $this->randomName(32),
++      'body' => array(LANGUAGE_NONE => array(array($this->randomName(64)))),
++    );
++    $node = $this->drupalCreateNode($settings);
++
++    // First try the callbacks alone.
++    $this->assertTrue(entity_metadata_no_hook_node_access('create', $node, $admin_account), 'Create access allowed for ADMIN, for node callback.');
++    $this->assertTrue(entity_metadata_no_hook_node_access('create', $node, $creator_account), 'Create access allowed for CREATOR, for node callback.');
++    $this->assertFalse(entity_metadata_no_hook_node_access('create', $node, $auth_only_account), 'Create access denied for USER, for node callback.');
++
++    // Now try the populated wrapper.
++    $wrapper = entity_metadata_wrapper('node', $node);
++    $this->assertTrue($wrapper->entityAccess('create', $admin_account), 'Create access allowed for ADMIN, for populated wrapper.');
++    $this->assertTrue($wrapper->entityAccess('create', $creator_account), 'Create access allowed for CREATOR, for populated wrapper.');
++    $this->assertFalse($wrapper->entityAccess('create', $auth_only_account), 'Create access denied for USER, for populated wrapper.');
++
++    // Now try a mock node.
++    $node = new stdClass();
++    $node->type = 'page';
++    $wrapper = entity_metadata_wrapper('node', $node);
++    $this->assertTrue($wrapper->entityAccess('create', $admin_account), 'Create access denied for ADMIN, for mock node wrapper.');
++    $this->assertTrue($wrapper->entityAccess('create', $creator_account), 'Create access denied for CREATOR, for mock node wrapper.');
++    $this->assertFalse($wrapper->entityAccess('create', $auth_only_account), 'Create access denied for USER, for mock node wrapper.');
++
++    // Now try the empty wrapper.
++    // Please try to make this set of assertions fail testing.
++    $wrapper = entity_metadata_wrapper('node', NULL, array('bundle' => 'page'));
++    $this->assertFalse($wrapper->entityAccess('create', $admin_account), 'Create access denied for ADMIN, for empty wrapper.');
++    $this->assertFalse($wrapper->entityAccess('create', $creator_account), 'Create access denied for CREATOR, for empty wrapper.');
++    $this->assertFalse($wrapper->entityAccess('create', $auth_only_account), 'Create access denied for USER, for empty wrapper.');
++  }
++
++}
+--- callbacks.inc
++++ callbacks.inc
+@@ -613,25 +613,22 @@
+  * This function does not implement hook_node_access(), thus it may not be
+  * called entity_metadata_node_access().
+  */
+-function entity_metadata_no_hook_node_access($op, $node = NULL, $account = NULL) {
+-  if (isset($node)) {
+-    // If a non-default revision is given, incorporate revision access.
+-    $default_revision = node_load($node->nid);
+-    if ($node->vid != $default_revision->vid) {
+-      return _node_revision_access($node, $op);
++function entity_metadata_no_hook_node_access($op, $node = NULL, $account = NULL, $entity_type = NULL) {
++  if (is_object($node)) {
++    // Check if node exist.
++    if (isset($node->nid)) {
++      // If a non-default revision is given, incorporate revision access.
++      $default_revision = node_load($node->nid);
++      if ($node->vid != $default_revision->vid) {
++        return _node_revision_access($node, $op, $account);
++      }
+     }
+     else {
+-      return node_access($op, $node, $account);
++      return node_access($op, $node->type, $account);
+     }
+   }
+-  // Is access to all nodes allowed?
+-  if (!user_access('access content', $account)) {
+-    return FALSE;
+-  }
+-  if (user_access('bypass node access', $account) || (!isset($account) && $op == 'view' && node_access_view_all_nodes())) {
+-    return TRUE;
+-  }
+-  return FALSE;
++  // Otherwise, use the standard node access.
++  return node_access($op, $node, $account);
+ }
+ 
+ /**

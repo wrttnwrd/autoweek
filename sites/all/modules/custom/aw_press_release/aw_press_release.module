@@ -1,0 +1,15 @@
+<?php
+/*
+ * @file aw_press_release.module
+ * 
+ * Provides interface to manage press release content. 
+ */
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function aw_press_release_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}

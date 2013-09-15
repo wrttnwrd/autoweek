@@ -1,0 +1,8 @@
+name = AWR Result
+description = A custom result content type for Autoweek.
+core = 7.x
+package = Autoweek
+version = 7.x-0.1-dev
+configure = admin/config/awr_result/manage
+dependencies[] = field_group
+dependencies[] = entityreference

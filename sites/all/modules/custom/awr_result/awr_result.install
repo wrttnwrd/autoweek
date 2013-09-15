@@ -1,0 +1,320 @@
+ <?php
+
+/**
+ * @file
+ * Autoweek Racing Result installation
+ */
+
+/**
+ * Implements hook_install().
+ */
+function awr_result_install() {
+
+    //Get localization function for installation as t() may be unavailable.
+    $t = get_t();
+        
+    // Content type definition.
+    $content_type = array(
+        'type' => 'awr_result',
+        'name' => $t('Race Result'),
+        'description' => $t('An Autoweek Race Result.'),
+        'title_label' => $t('Auto Title'),
+        'base' => 'node_content',
+        'custom' => TRUE,
+    );
+    
+    // Set remaining definitions with defaults.
+    $node_type = node_type_set_defaults($content_type);
+    
+    // Save the content type
+    node_type_save($node_type);
+        
+    // Create fields.
+    $fields = array();
+    
+    //start group 1 Fields
+    $fields['awr_result_legacy_result_id'] = array(
+        'field_name' => 'awr_result_legacy_result_id',
+        'type' => 'text',
+        'weight' => 1,
+    );
+    
+    //start group 2 Fields
+    $fields['awr_result_driver'] = array(
+        'field_name' => 'awr_result_driver',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 2,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_driver' => 'awr_driver',
+                ),
+            ),
+        ),
+    );
+    $fields['awr_result_event'] = array(
+        'field_name' => 'awr_result_event',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 3,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_event' => 'awr_event',
+                ),
+            ),
+        ),
+    );
+    $fields['awr_result_race_rank'] = array(
+        'field_name' => 'awr_result_race_rank',
+        'type' => 'number_integer',
+        'weight' => 4,
+    );
+    $fields['awr_result_time'] = array(
+        'field_name' => 'awr_result_time',
+        'type' => 'text',
+        'weight' => 5,
+    );
+    $fields['awr_result_laps'] = array(
+        'field_name' => 'awr_result_laps',
+        'type' => 'number_integer',
+        'weight' => 6,
+    );
+    $fields['awr_result_points'] = array(
+        'field_name' => 'awr_result_points',
+        'type' => 'number_integer',
+        'weight' => 7,
+    );
+    $fields['awr_result_starting'] = array(
+        'field_name' => 'awr_result_starting',
+        'type' => 'number_integer',
+        'weight' => 8,
+    );
+    $fields['awr_result_status'] = array(
+        'field_name' => 'awr_result_status',
+        'type' => 'taxonomy_term_reference',
+        'weight' => 9,
+        'settings' => array(
+            'allowed_values' => array(
+               array(
+                'vocabulary' => 'racing_status',
+                'parent' => 0,
+               ),
+             ),
+           ),
+        'cardinality' => 1,
+    );
+    $fields['awr_result_round'] = array(
+        'field_name' => 'awr_result_round',
+        'type' => 'number_integer',
+        'weight' => 10,
+    );
+    $fields['awr_result_speed'] = array(
+        'field_name' => 'awr_result_speed',
+        'type' => 'number_decimal',
+        'weight' => 11,
+    );
+    $fields['awr_result_round_record'] = array(
+        'field_name' => 'awr_result_round_record',
+        'type' => 'text',
+        'weight' => 12,
+    );
+    $fields['awr_result_standing'] = array(
+        'field_name' => 'awr_result_standing',
+        'type' => 'number_integer',
+        'weight' => 13,
+    );
+    $fields['awr_result_position'] = array(
+        'field_name' => 'awr_result_position',
+        'type' => 'number_integer',
+        'weight' => 14,
+    );
+    $fields['awr_result_season'] = array(
+        'field_name' => 'awr_result_season',
+        'type' => 'number_integer',
+        'weight' => 15,
+    );
+    
+    foreach ($fields as $field) {
+        field_create_field($field);
+    }
+    
+    // Create field instances.
+    $instances = array();
+
+    //start group 1 Instances
+    $instances['awr_result_legacy_result_id'] = array(
+        'field_name' => 'awr_result_legacy_result_id',
+        'label' => $t('Legacy Result ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    
+    //start group 2 Instances
+    $instances['awr_result_driver'] = array(
+        'field_name' => 'awr_result_driver',
+        'label' => $t('Driver Reference'),
+        'description' => $t('Reference the Driver.'),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );
+    $instances['awr_result_event'] = array(
+        'field_name' => 'awr_result_event',
+        'label' => $t('Event Reference'),
+        'description' => $t('Reference the Event.'),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );
+    $instances['awr_result_race_rank'] = array(
+        'field_name' => 'awr_result_race_rank',
+        'label' => $t('Race Rank'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_result_time'] = array(
+        'field_name' => 'awr_result_time',
+        'label' => $t('Final Time'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_result_laps'] = array(
+        'field_name' => 'awr_result_laps',
+        'label' => $t('Laps Completed'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_result_points'] = array(
+        'field_name' => 'awr_result_points',
+        'label' => $t('Points'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_result_starting'] = array(
+        'field_name' => 'awr_result_starting',
+        'label' => $t('Starting Position'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_result_status'] = array(
+        'field_name' => 'awr_result_status',
+        'label' => $t('Status'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'taxonomy_autocomplete',
+        ),
+    );
+    $instances['awr_result_round'] = array(
+        'field_name' => 'awr_result_round',
+        'label' => $t('Round'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_result_speed'] = array(
+        'field_name' => 'awr_result_speed',
+        'label' => $t('Speed'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_result_round_record'] = array(
+        'field_name' => 'awr_result_round_record',
+        'label' => $t('Round Record'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_result_standing'] = array(
+        'field_name' => 'awr_result_standing',
+        'label' => $t('Points Standing'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_result_position'] = array(
+        'field_name' => 'awr_result_position',
+        'label' => $t('Position in Class'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_result_season'] = array(
+        'field_name' => 'awr_result_season',
+        'label' => $t('Racing Season'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    
+    foreach ($instances as $instance) {
+        $instance['entity_type'] = 'node';
+        $instance['bundle'] = 'awr_result';
+        field_create_instance($instance);
+    }
+}
+
+/**
+* Implements hook_uninstall().
+*/
+function awr_result_uninstall() {
+
+    // Inform the user of the removal.
+    $t = get_t();
+    
+    //Get all node ids with awr_result content type.
+    $sql_query = 'SELECT nid ';
+    $sql_query .= 'FROM {node} ';
+    $sql_query .= 'WHERE {node}.type = :type ';
+    $result = db_query($sql_query, array(':type' => 'awr_result'));
+    
+    $nids = array();
+    foreach ($result as $row) {
+        $nids[] = $row->nid;
+    }
+    
+    // Delete all awr_result content.
+    node_delete_multiple($nids);
+    drupal_set_message($t('Autoweek Race Result content removed.'));
+    
+    //Remove all fields and field instances.
+    foreach (field_info_instances('node', 'awr_result') as $field_name => $instance) {
+        field_delete_instance($instance);
+    }
+    drupal_set_message($t('Autoweek Race Result fields and field instances removed.'));
+    
+    //Delete the content type.
+    node_type_delete('awr_result');
+    drupal_set_message($t('Autoweek Race  content type removed.'));
+        
+    //Clean up deleted fields.
+    field_purge_batch(1000);
+}

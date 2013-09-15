@@ -1,0 +1,124 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek video.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function aw_video_help($path, $arg) {
+    switch($path) {
+        case 'admin/help#aw_video':{
+            $ret_val = '<h3>' . t('About') . '</h3>';
+            $ret_val .= '<p>' . t('The AW Video module is used to manage the custom Autoweek video content type.') . '</p>';
+            return $ret_val;
+            break;
+        }
+    }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function aw_video_menu(){
+    $items = array();
+    
+//Admin configuration group.
+$items['admin/config/aw_video'] = array(
+    'title' => 'AW Video',
+    'description' => 'Administer AW Video',
+    'access arguments' => array('administer aw video'),
+);
+//Admin configuration - Settings.
+$items['admin/config/aw_video/manage'] = array(
+    'title' => 'AW Video Settings',
+    'description' => 'Manage AW Video settings and configurations.',
+    'access arguments' => array('administer aw video'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('aw_video_admin_settings_form'),
+);
+
+return $items;
+}
+
+/**
+ * Implements hook_form().
+ */
+function aw_video_admin_settings_form($node, &$form_state) {
+    $form = array();
+    
+    $form['overview'] = array(
+        '#markup' => t('This interface allows administrators to manage general AW Video Settings'),
+        '#prefix' => '<p>',
+        '#suffix' => '</p>',
+    );
+    
+    $form['aw_video_test'] = array(
+        '#title' => t('Enable some test field'),
+        '#description' => t('When enabled, I will do nothing and you will like it.'),
+        '#type' => 'checkbox',
+        '#default_value' => variable_get('aw_video_test'),
+    );
+    
+    $form['aw_video_path'] = array(
+        '#title' => t('Video title'),
+        '#description' => t('This field holds the path to the video file (not including the root).'),
+        '#type' => 'textfield',
+        '#default_value' => variable_get('aw_video_path'),
+    );
+
+    return system_settings_form($form);
+}
+
+/**
+ * Validates Autoweek video admin settings.
+ */
+function aw_video_admin_settings_form_validate($form, &$form_state) {    
+    //shorthand for long array name
+    $vidpath = $form_state['values']['aw_video_path'];
+    
+    //validate video path format
+    if(!_aw_video_validate_signed_degreees($vidpath)) {
+        form_set_error('aw_video_path', t('Invalid video path: must be signed degree FOR TESTING ONLY ex. 2.3'));
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function aw_video_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'aw_video_node_form':{
+            $form['#validate'][] = 'aw_video_node_form_validate';
+            break;
+        }
+    }
+}
+
+/**
+ * Validates Autoweek Video content type.
+ */
+function aw_video_node_form_validate($form, &$form_state) {
+    /*//Validate Video Upload field.
+    $vid_img_fid =$form_state['values']['aw_video_img'][LANGUAGE_NONE][0]['fid'];
+    if($vid_img_fid == 0){
+        form_set_error('aw_video_img', t('You must upload an image for the video.'));
+    }
+        
+    //Validate that the alt text for the video image is entered.
+    $vid_img_alt_txt = $form_state['values']['aw_video_img'][LANGUAGE_NONE][0]['alt'];
+    if(!$vid_img_alt_txt) {
+        form_set_error('aw_video_img', t('Please enter an alt text for the uploaded video.'));
+    }*/
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function aw_video_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}

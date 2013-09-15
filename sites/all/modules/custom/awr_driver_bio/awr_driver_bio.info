@@ -1,0 +1,10 @@
+name = AWR Driver Bio
+description = A custom driver bio content type for Autoweek.
+core = 7.x
+package = Autoweek
+version = 7.x-0.1-dev
+configure = admin/config/awr_driver_bio/manage
+dependencies[] = image
+dependencies[] = date
+dependencies[] = imagefield_tokens
+dependencies[] = field_group

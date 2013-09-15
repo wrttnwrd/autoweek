@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek paragraph.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function aw_paragraph_help($path, $arg) {
+    switch($path) {
+        case 'admin/help#aw_paragraph':{
+            $ret_val = '<h3>' . t('About') . '</h3>';
+            $ret_val .= '<p>' . t('The AW paragraph module is used to manage the custom Autoweek paragraph content type.') . '</p>';
+            return $ret_val;
+            break;
+        }
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function aw_paragraph_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'aw_paragraph_node_form':{
+            $form['#validate'][] = 'aw_paragraph_node_form_validate';
+            break;
+        }
+    }
+}
+
+/**
+ * Validates Autoweek paragraph content type.
+ */
+function aw_paragraph_node_form_validate($form, &$form_state) {
+
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function aw_paragraph_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}

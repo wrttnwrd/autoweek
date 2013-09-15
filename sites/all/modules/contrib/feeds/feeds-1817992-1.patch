@@ -1,0 +1,27 @@
+From 5d5cc3302cc8c48e38b6c78d122fa4f16ef2bcb0 Mon Sep 17 00:00:00 2001
+From: OnkelTem <OnkelTem@239962.no-reply.drupal.org>
+Date: Fri, 19 Oct 2012 22:43:53 +0400
+Subject: [PATCH] Issue #1817992 by OnkelTem: Notice: Undefined property:
+ stdClass:: in feeds_tokens() (line 32 of
+ feeds/feeds.tokens.inc)
+
+---
+ feeds.tokens.inc |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/feeds.tokens.inc b/feeds.tokens.inc
+index cb7dc4c..a5145b6 100644
+--- a/feeds.tokens.inc
++++ b/feeds.tokens.inc
+@@ -25,7 +25,7 @@ function feeds_token_info() {
+ function feeds_tokens($type, $tokens, array $data, array $options) {
+   $replacements = array();
+ 
+-  if ($type == 'node' && !empty($data['node'])) {
++  if ($type == 'node' && !empty($data['node']) && !empty($data['node']->nid)) {
+ 
+     $sanitize = !empty($options['sanitize']);
+ 
+-- 
+1.7.9.5
+

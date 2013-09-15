@@ -1,0 +1,586 @@
+<?php
+
+/**
+ * @file
+ * Autoweek Racing Location installation
+ */
+
+/**
+ * Implements hook_install().
+ */
+function awr_location_install() {
+    
+    
+    //Get localization function for installation as t() may be unavailable.
+    $t = get_t();
+    
+    // Content type definition.
+    $content_type = array(
+        'type' => 'awr_location',
+        'name' => $t('Racing Location'),
+        'description' => $t('An Autoweek Track Location.'),
+        'title_label' => $t('Location Name'),
+        'base' => 'node_content',
+        'custom' => TRUE,
+    );
+    
+    // Set remaining definitions with defaults.
+    $node_type = node_type_set_defaults($content_type);
+    
+    // Save the content type
+    node_type_save($node_type);
+           
+    // Create fields.
+    $fields = array();
+    
+    //Location Information
+    $fields['awr_location_description'] = array(
+        'field_name' => 'awr_location_description',
+        'type' => 'text_long',
+    );
+    $fields['awr_location_address'] = array(
+        'field_name' => 'awr_location_address',
+        'type' => 'text',
+    );
+    $fields['awr_location_city'] = array(
+        'field_name' => 'awr_location_city',
+        'type' => 'text',
+    );
+    $fields['awr_location_state'] = array(
+        'field_name' => 'awr_location_state',
+        'type' => 'text',
+    );
+    $fields['awr_location_zip'] = array(
+        'field_name' => 'awr_location_zip',
+        'type' => 'text',
+    );
+    $fields['awr_location_country'] = array(
+        'field_name' => 'awr_location_country',
+        'type' => 'text',
+    );
+    $fields['awr_location_phone'] = array(
+        'field_name' => 'awr_location_phone',
+        'type' => 'text',
+    );
+    $fields['awr_location_website'] = array(
+        'field_name' => 'awr_location_website',
+        'type' => 'text',
+    );
+    $fields['awr_location_opened'] = array(
+        'field_name' => 'awr_location_opened',
+        'type' => 'number_integer',
+    );
+    $fields['awr_location_main_image'] = array(
+        'field_name' => 'awr_location_main_image',
+        'type' => 'image',
+    );
+    $fields['awr_location_simple_image'] = array(
+        'field_name' => 'awr_location_simple_image',
+        'type' => 'image',
+    );
+    $fields['awr_location_weather_station'] = array(
+        'field_name' => 'awr_location_weather_station',
+        'type' => 'text',
+    );
+    $fields['awr_location_latitude'] = array(
+        'field_name' => 'awr_location_latitude',
+        'type' => 'number_decimal',
+        'settings' => array(
+            'precision' => 10,
+            'scale' => 6,
+        ),
+    );
+    $fields['awr_location_longitude'] = array(
+        'field_name' => 'awr_location_longitude',
+        'type' => 'number_decimal',
+        'settings' => array(
+            'precision' => 10,
+            'scale' => 6,
+        ),
+    );
+    
+    //Technical Information
+    $fields['awr_location_num_stages'] = array(
+        'field_name' => 'awr_location_num_stages',
+        'type' => 'number_integer',
+    );
+    $fields['awr_location_distance'] = array(
+        'field_name' => 'awr_location_distance',
+        'type' => 'number_decimal',
+    );
+    $fields['awr_location_configuration'] = array(
+        'field_name' => 'awr_location_configuration',
+        'type' => 'text',
+    );
+    $fields['awr_location_banking'] = array(
+        'field_name' => 'awr_location_banking',
+        'type' => 'text',
+    );
+    $fields['awr_location_front_stretch'] = array(
+        'field_name' => 'awr_location_front_stretch',
+        'type' => 'number_decimal',
+    );
+    $fields['awr_location_back_stretch'] = array(
+        'field_name' => 'awr_location_back_stretch',
+        'type' => 'number_decimal',
+    );
+    $fields['awr_location_direction'] = array(
+        'field_name' => 'awr_location_direction',
+        'type' => 'list_text',
+        'cardinality' => 1,
+        'settings' => array(
+            'allowed_values' => array(
+                'clockwise' => 'Clockwise',
+                'counterclockwise' => 'Counterclockwise',
+            ),
+        ),
+    );
+    $fields['awr_location_num_turns'] = array(
+        'field_name' => 'awr_location_num_turns',
+        'type' => 'number_integer',
+    );
+    $fields['awr_location_elevation_change'] = array(
+        'field_name' => 'awr_location_elevation_change',
+        'type' => 'text',
+    );
+    $fields['awr_location_surface'] = array(
+        'field_name' => 'awr_location_surface',
+        'type' => 'text',
+    );
+    $fields['awr_location_altitude'] = array(
+        'field_name' => 'awr_location_altitude',
+        'type' => 'number_integer',
+    );
+    $fields['awr_location_seating'] = array(
+        'field_name' => 'awr_location_seating',
+        'type' => 'text',
+    );
+    
+    //Hidden Legacy Fields
+    $fields['awr_location_legacy_location_id'] = array(
+        'field_name' => 'awr_location_legacy_location_id',
+        'type' => 'text',
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+
+    foreach ($fields as $field) {
+        field_create_field($field);
+    }
+    
+    // Create field instances.
+    $instances = array();
+    
+    //Location Information
+
+    $instances['awr_location_description'] = array(
+        'field_name' => 'awr_location_description',
+        'label' => $t('Location Description'),
+        'widget' => array(
+            'type' => 'text_textarea',
+            'settings' => array(
+                'rows' => 4,
+            ),
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_address'] = array(
+        'field_name' => 'awr_location_address',
+        'label' => $t('Address'),
+        'description' => $t('Street address, e.g. 1155 Gratiot Avenue'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_city'] = array(
+        'field_name' => 'awr_location_city',
+        'label' => $t('City'),
+        'description' => $t('e.g. Detroit'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_state'] = array(
+        'field_name' => 'awr_location_state',
+        'label' => $t('State'),
+        'description' => $t('State or Region, e.g. Michigan'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_zip'] = array(
+        'field_name' => 'awr_location_zip',
+        'label' => $t('Zip Code'),
+        'description' => $t('Zip or Postal code, e.g. 48207'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_country'] = array(
+        'field_name' => 'awr_location_country',
+        'label' => $t('Country'),
+        'description' => $t('e.g. United States of America'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_phone'] = array(
+        'field_name' => 'awr_location_phone',
+        'label' => $t('Phone Number'),
+        'description' => $t('e.g. 1-313-446-6000'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_website'] = array(
+        'field_name' => 'awr_location_website',
+        'label' => $t('Website'),
+        'description' => $t('e.g. www.autoweek.com'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_opened'] = array(
+        'field_name' => 'awr_location_opened',
+        'label' => $t('Opened'),
+        'description' => $t('e.g. 1958'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_location_main_image'] = array(
+        'field_name' => 'awr_location_main_image',
+        'label' => $t('Location Image'),
+        'description' => $t('Detailed Location Graphic'),
+        'settings' => array(
+            'title_field' => TRUE,
+            'alt_field' => TRUE,
+            'alt_field_default' => '[node:title]',
+            'title_field_default' => '[node:title]',
+        ),
+        'display' => array(
+            'default' => array(
+                'settings' => array(
+                    'image_style' => 'awr-loc-main',
+                ),
+                'weight' => 0,
+            ),
+        ),
+    );
+    $instances['awr_location_simple_image'] = array(
+        'field_name' => 'awr_location_simple_image',
+        'label' => $t('Simple Location Image'),
+        'description' => $t('Simple Location Graphic'),
+        'settings' => array(
+            'title_field' => TRUE,
+            'alt_field' => TRUE,
+            'alt_field_default' => '[node:title]',
+            'title_field_default' => '[node:title]',
+        ),
+        'display' => array(
+            'default' => array(
+                'settings' => array(
+                    'image_style' => 'awr-loc-simple',
+                ),
+                'weight' => 0,
+            ),
+        ),
+    );
+    $instances['awr_location_weather_station'] = array(
+        'field_name' => 'awr_location_weather_station',
+        'label' => $t('Closest Weather Station'),
+        'description' => $t('e.g. www.autoweek.com'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    ); 
+    $instances['awr_location_latitude'] = array(
+        'field_name' => 'awr_location_latitude',
+        'label' => $t('Latitude'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_location_longitude'] = array(
+        'field_name' => 'awr_location_longitude',
+        'label' => $t('Longitude'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    
+    //Technical Information
+    $instances['awr_location_num_stages'] = array(
+        'field_name' => 'awr_location_num_stages',
+        'label' => $t('Number of Stages'),
+        'description' => $t('e.g. 7'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_location_distance'] = array(
+        'field_name' => 'awr_location_distance',
+        'label' => $t('Distance (Miles)'),
+        'description' => $t('e.g. 2.35'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_location_configuration'] = array(
+        'field_name' => 'awr_location_configuration',
+        'label' => $t('Track Configuration'),
+        'description' => $t('e.g. Oval'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_banking'] = array(
+        'field_name' => 'awr_location_banking',
+        'label' => $t('Banking'),
+        'description' => $t('e.g. 20-degree turns, 9-degree straights'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_front_stretch'] = array(
+        'field_name' => 'awr_location_front_stretch',
+        'label' => $t('Front Stretch (Feet)'),
+        'description' => $t('e.g. 1800'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_location_back_stretch'] = array(
+        'field_name' => 'awr_location_back_stretch',
+        'label' => $t('Back Stretch (Feet)'),
+        'description' => $t('e.g. 2244.10'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_location_direction'] = array(
+        'field_name' => 'awr_location_direction',
+        'label' => $t('Direction'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'options_select',
+        ),
+    );
+    $instances['awr_location_num_turns'] = array(
+        'field_name' => 'awr_location_num_turns',
+        'label' => $t('Number of Turns'),
+        'description' => $t('e.g. 4'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_location_elevation_change'] = array(
+        'field_name' => 'awr_location_elevation_change',
+        'label' => $t('Elevation Change (Feet)'),
+        'description' => $t('e.g. 118.11'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_location_surface'] = array(
+        'field_name' => 'awr_location_surface',
+        'label' => $t('Track Surface'),
+        'description' => $t('e.g. Concrete-asphalt mix'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_location_altitude'] = array(
+        'field_name' => 'awr_location_altitude',
+        'label' => $t('Altitude (Feet)'),
+        'description' => $t('e.g. 1100'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_location_seating'] = array(
+        'field_name' => 'awr_location_seating',
+        'label' => $t('Seating'),
+        'description' => $t('e.g. 25000'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    
+    //Legacy Fields
+    $instances['awr_location_legacy_location_id'] = array(
+        'field_name' => 'awr_location_legacy_location_id',
+        'label' => $t('Legacy Location ID'),
+        'required' => FALSE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    
+    foreach ($instances as $instance) {
+        $instance['entity_type'] = 'node';
+        $instance['bundle'] = 'awr_location';
+        field_create_instance($instance);
+    }
+    
+    //Call function to create styles.
+    $style_name = array('awr-loc-main', 'awr-loc-simple');
+    _awr_location_styles_create($style_name);
+}
+
+/**
+* Implements hook_uninstall().
+*/
+function awr_location_uninstall() {
+
+    $t = get_t();
+    
+    //Get all node ids with awr_location content type.
+    $sql_query = 'SELECT nid ';
+    $sql_query .= 'FROM {node} ';
+    $sql_query .= 'WHERE {node}.type = :type ';
+    $result = db_query($sql_query, array(':type' => 'awr_location'));
+    
+    $nids = array();
+    foreach ($result as $row) {
+        $nids[] = $row->nid;
+    }
+    
+    // Delete all awr_location content.
+    node_delete_multiple($nids);
+    drupal_set_message($t('Autoweek Racing Location content removed.'));
+    
+    //Remove all fields and field instances.
+    foreach (field_info_instances('node', 'awr_location') as $field_name => $instance) {
+        field_delete_instance($instance);
+    }
+    drupal_set_message($t('Autoweek Racing Location fields and field instances removed.'));
+    
+    //Delete the content type.
+    node_type_delete('awr_location');
+    drupal_set_message($t('Autoweek Racing Location content type removed.'));
+    
+    //Delete image styles.
+    $style_name = array('awr-loc-main', 'awr-loc-simple');
+    _awr_location_styles_delete($style_name);
+    
+    //Clean up deleted fields.
+    field_purge_batch(1000);
+}
+
+/**
+* Implements function to create new image style.
+*/
+function _awr_location_styles_create($style_name) {
+    // Create image styles.
+    foreach($style_name as $value) {
+        $style = image_style_save(array('name' => $value));
+
+        switch($value) {
+            case 'awr-loc-main':{
+                $effect = array(
+                    'name' => 'image_scale',
+                    'data' => array(
+                      'width' => 190,
+                      'height' => 154,
+                      'upscale' => TRUE,
+                    ),
+                    'isid' => $style['isid'],
+                 );
+                break;
+            }
+            case 'awr-loc-simple':{
+                $effect = array(
+                    'name' => 'image_scale',
+                    'data' => array(
+                      'width' => 190,
+                      'height' => 154,
+                      'upscale' => TRUE,
+                    ),
+                    'isid' => $style['isid'],
+                 );
+                break;
+            }
+        }
+        image_effect_save($effect);
+    }
+    
+    // Give user feedback.
+    $t = get_t();
+    drupal_set_message($t('Autoweek Racing Location styles created.'));
+    
+}
+
+/**
+* Implements function to delete image styles.
+*/
+function _awr_location_styles_delete($style_name) {
+    // Delete image styles.
+    foreach($style_name as $value) {
+        image_style_delete(image_style_load($value));
+    }
+    
+    // Give user feedback.
+    $t = get_t();
+    drupal_set_message($t('Autoweek Racing Location styles deleted.'));
+    
+}

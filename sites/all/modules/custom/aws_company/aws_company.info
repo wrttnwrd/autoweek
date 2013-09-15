@@ -1,0 +1,9 @@
+name = AWS Company
+description = A custom content type for Autoweek Company.
+core = 7.x
+package = Autoweek
+version = 7.x-0.1-dev
+configure = admin/config/aws_company/manage
+dependencies[] = image
+dependencies[] = imagefield_tokens
+dependencies[] = field_group

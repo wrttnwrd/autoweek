@@ -1,0 +1,6 @@
+name = AW Press Release
+description = A custom Press Release content type for Autoweek.
+core = 7.x
+package = Autoweek
+version = 7.x-0.1-dev
+configure = admin/config/aw_press_release/manage

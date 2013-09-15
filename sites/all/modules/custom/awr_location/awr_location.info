@@ -1,0 +1,8 @@
+name = AWR Location
+description = Provides interface for creating and displaying track locations.
+core = 7.x
+version = 7.x-0.1-dev
+package = Autoweek
+dependencies[] = image
+dependencies[] = imagefield_tokens
+dependencies[] = field_group

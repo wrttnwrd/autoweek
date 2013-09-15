@@ -1,0 +1,442 @@
+<?php
+
+/**
+ * @file
+ * Autoweek Racing Driver Bio installation
+ */
+
+/**
+ * Implements hook_install().
+ */
+function awr_driver_bio_install() {
+    
+    //Get localization function for installation as t() may be unavailable.
+    $t = get_t();
+        
+    // Content type definition.
+    $content_type = array(
+        'type' => 'awr_driver_bio',
+        'name' => $t('Racing Driver Bio'),
+        'description' => $t('An Autoweek Racing Driver Bio.'),
+        'title_label' => $t('Full Name'),
+        'base' => 'node_content',
+        'custom' => TRUE,
+    );
+    
+    // Set remaining definitions with defaults.
+    $node_type = node_type_set_defaults($content_type);
+    
+    // Save the content type
+    node_type_save($node_type);
+    
+    // Add a field for the body
+    //node_add_body_field($node_type, $t('Description'));
+    
+    // Create fields.
+    $fields = array();
+    
+    //Group 1 - Driver Info
+    $fields['awr_driver_bio_first_name'] = array(
+        'field_name' => 'awr_driver_bio_first_name',
+        'type' => 'text',
+        'weight' => 1,
+    );
+    $fields['awr_driver_bio_last_name'] = array(
+        'field_name' => 'awr_driver_bio_last_name',
+        'type' => 'text',
+        'weight' => 2,
+    );
+    $fields['awr_driver_bio_main_img'] = array(
+        'field_name' => 'awr_driver_bio_main_img',
+        'type' => 'image',
+        'weight' => 3,
+    );
+    $fields['awr_driver_bio_card_img'] = array(
+        'field_name' => 'awr_driver_bio_card_img',
+        'type' => 'image',
+        'weight' => 4,
+    );
+    $fields['awr_driver_bio_website'] = array(
+        'field_name' => 'awr_driver_bio_website',
+        'type' => 'text',
+        'weight' => 5,
+    );
+    $fields['awr_driver_bio_fb'] = array(
+        'field_name' => 'awr_driver_bio_fb',
+        'type' => 'text',
+        'weight' => 6,
+    );
+    $fields['awr_driver_bio_twitter'] = array(
+        'field_name' => 'awr_driver_bio_twitter',
+        'type' => 'text',
+        'weight' => 7,
+    );
+    $fields['awr_driver_bio_twitter_widget'] = array(
+        'field_name' => 'awr_driver_bio_twitter_widget',
+        'type' => 'text',
+        'weight' => 8,
+    );
+    
+    //Group 2 - Driver Bio
+    $fields['awr_driver_bio_birthdate'] = array(
+        'field_name' => 'awr_driver_bio_birthdate',
+        'type' => 'date',
+        'weight' => 9,
+        'settings' => array(
+            'granularity' => array(
+                'year' => 'year',
+                'month' => 'month',
+                'day' => 'day',
+            ),
+        ),
+    );
+    $fields['awr_driver_bio_hometown'] = array(
+        'field_name' => 'awr_driver_bio_hometown',
+        'type' => 'text',
+        'weight' => 10,
+    );
+    $fields['awr_driver_bio_residence'] = array(
+        'field_name' => 'awr_driver_bio_residence',
+        'type' => 'text',
+        'weight' => 11,
+    );
+    $fields['awr_driver_bio_debut'] = array(
+        'field_name' => 'awr_driver_bio_debut',
+        'type' => 'text',
+        'weight' => 12,
+    );
+    $fields['awr_driver_bio_summary'] = array(
+        'field_name' => 'awr_driver_bio_summary',
+        'type' => 'text_long',
+        'weight' => 13,
+        'settings' => array(
+            'max_length' => 0,
+        ),
+    );
+    $fields['awr_driver_bio_full'] = array(
+        'field_name' => 'awr_driver_bio_full',
+        'type' => 'text_long',
+        'weight' => 14,
+        'settings' => array(
+            'max_length' => 0,
+        ),
+    );
+    
+    //Group 3 - Legacy
+    $fields['awr_driver_bio_legacy_driver_id'] = array(
+        'field_name' => 'awr_driver_bio_legacy_driver_id',
+        'type' => 'text',
+        'weight' => 15,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['awr_driver_bio_saxid'] = array(
+        'field_name' => 'awr_driver_bio_saxid',
+        'type' => 'text',
+        'weight' => 16,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    
+    foreach ($fields as $field) {
+        field_create_field($field);
+    }
+    
+    // Create field instances.
+    $instances = array();
+    
+    //Group 1 - Driver Info
+    $instances['awr_driver_bio_first_name'] = array(
+        'field_name' => 'awr_driver_bio_first_name',
+        'label' => $t('First Name'),
+        'description' => $t('First name of driver.'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_driver_bio_last_name'] = array(
+        'field_name' => 'awr_driver_bio_last_name',
+        'label' => $t('Last Name'),
+        'description' => $t('Last name of driver.'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_driver_bio_main_img'] = array(
+        'field_name' => 'awr_driver_bio_main_img',
+        'label' => $t('Upload main driver image here'),
+        'description' => $t('The uploaded main driver image file.'),
+        'settings' => array(
+            'title_field' => TRUE,
+            'alt_field' => TRUE,
+            'alt_field_default' => '[node:title]',
+            'title_field_default' => '[node:title]',
+        ),
+        'display' => array(
+            'default' => array(
+                'settings' => array(
+                    'image_style' => 'awr-bio-main',
+                ),
+                'weight' => 0,
+            ),
+        ),
+    );
+    $instances['awr_driver_bio_card_img'] = array(
+        'field_name' => 'awr_driver_bio_card_img',
+        'label' => $t('Upload driver card image here'),
+        'description' => $t('The uploaded driver card image file.'),
+        'settings' => array(
+            'title_field' => TRUE,
+            'alt_field' => TRUE,
+            'alt_field_default' => '[node:title]',
+            'title_field_default' => '[node:title]',
+        ),
+        'display' => array(
+            'default' => array(
+                'settings' => array(
+                    'image_style' => 'awr-bio-card',
+                ),
+                'weight' => 0,
+            ),
+        ),
+    );
+    $instances['awr_driver_bio_website'] = array(
+        'field_name' => 'awr_driver_bio_website',
+        'label' => $t('Website'),
+        'description' => $t('Driver Website.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_driver_bio_fb'] = array(
+        'field_name' => 'awr_driver_bio_fb',
+        'label' => $t('Facebook Account'),
+        'description' => $t('Driver Facebook account.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_driver_bio_twitter'] = array(
+        'field_name' => 'awr_driver_bio_twitter',
+        'label' => $t('Twitter Account'),
+        'description' => $t('Driver Twitter account.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_driver_bio_twitter_widget'] = array(
+        'field_name' => 'awr_driver_bio_twitter_widget',
+        'label' => $t('Twitter Widget ID'),
+        'description' => $t('Driver Twitter Widget ID.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    
+    //Group 2 - Driver Bio
+    $instances['awr_driver_bio_birthdate'] = array(
+        'field_name' => 'awr_driver_bio_birthdate',
+        'label' => $t('Birthdate'),
+        'description' => $t('Driver birthdate. Format MM/DD/YYYY.'),
+        'widget' => array(
+            'type' => 'date_text',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+            'default_value' => 'blank',
+        ),
+    );
+    $instances['awr_driver_bio_hometown'] = array(
+        'field_name' => 'awr_driver_bio_hometown',
+        'label' => $t('Hometown'),
+        'description' => $t('Driver hometown.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_bio_residence'] = array(
+        'field_name' => 'awr_driver_bio_residence',
+        'label' => $t('Residence'),
+        'description' => $t('Driver residence.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_bio_debut'] = array(
+        'field_name' => 'awr_driver_bio_debut',
+        'label' => $t('Debut'),
+        'description' => $t('Driver Debut.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_bio_summary'] = array(
+        'field_name' => 'awr_driver_bio_summary',
+        'label' => $t('Bio Summary'),
+        'description' => $t('Bio Summary.'),
+        'widget' => array(
+            'type' => 'text_textarea',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_driver_bio_full'] = array(
+        'field_name' => 'awr_driver_bio_full',
+        'label' => $t('Full Bio'),
+        'description' => $t('Full driver bio.'),
+        'widget' => array(
+            'type' => 'text_textarea',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    
+    //Group 3 - Legacy
+    $instances['awr_driver_bio_legacy_driver_id'] = array(
+        'field_name' => 'awr_driver_bio_legacy_driver_id',
+        'label' => $t('Legacy Driver ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    $instances['awr_driver_bio_saxid'] = array(
+        'field_name' => 'awr_driver_bio_saxid',
+        'label' => $t('Legacy Saxonomy ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+    );
+    
+    foreach ($instances as $instance) {
+        $instance['entity_type'] = 'node';
+        $instance['bundle'] = 'awr_driver_bio';
+        field_create_instance($instance);
+    }
+    
+    //Call function to create styles.
+    $style_name = array('awr-bio-main', 'awr-bio-card');
+    _awr_driver_bio_styles_create($style_name);
+}
+
+/**
+* Implements hook_uninstall().
+*/
+function awr_driver_bio_uninstall() {
+
+    // Inform the user of the removal.
+    $t = get_t();
+    
+    //Get all node ids with awr_driver_bio content type.
+    $sql_query = 'SELECT nid ';
+    $sql_query .= 'FROM {node} ';
+    $sql_query .= 'WHERE {node}.type = :type ';
+    $result = db_query($sql_query, array(':type' => 'awr_driver_bio'));
+    
+    $nids = array();
+    foreach ($result as $row) {
+        $nids[] = $row->nid;
+    }
+    
+    // Delete all awr_driver_bio content.
+    node_delete_multiple($nids);
+    drupal_set_message($t('Autoweek Racing Driver Bio content removed.'));
+    
+    //Remove all fields and field instances.
+    foreach (field_info_instances('node', 'awr_driver_bio') as $field_name => $instance) {
+        field_delete_instance($instance);
+    }
+    drupal_set_message($t('Autoweek Racing Driver Bio fields and field instances removed.'));
+    
+    //Delete the content type.
+    node_type_delete('awr_driver_bio');
+    drupal_set_message($t('Autoweek Racing Driver Bio content type removed.'));
+    
+    //Delete image styles.
+    $style_name = array('awr-bio-main', 'awr-bio-card');
+    _awr_driver_bio_styles_delete($style_name);
+    
+    //Clean up deleted fields.
+    field_purge_batch(1000);
+}
+
+/**
+* Implements function to create new image style.
+*/
+function _awr_driver_bio_styles_create($style_name) {
+    // Create image styles.
+    foreach($style_name as $value) {
+        $style = image_style_save(array('name' => $value));
+
+        switch($value) {
+            case 'awr-bio-main':{
+                $effect = array(
+                    'name' => 'image_scale',
+                    'data' => array(
+                      'width' => 90,
+                      'height' => 54,
+                      'upscale' => TRUE,
+                    ),
+                    'isid' => $style['isid'],
+                 );
+                break;
+            }
+            case 'awr-bio-card':{
+                $effect = array(
+                    'name' => 'image_scale',
+                    'data' => array(
+                      'width' => 90,
+                      'height' => 54,
+                      'upscale' => TRUE,
+                    ),
+                    'isid' => $style['isid'],
+                 );
+                break;
+            }
+        }
+        image_effect_save($effect);
+    }
+    
+    // Give user feedback.
+    $t = get_t();
+    drupal_set_message($t('Autoweek Racing Driver Bio styles created.'));
+    
+}
+
+/**
+* Implements function to delete image styles.
+*/
+function _awr_driver_bio_styles_delete($style_name) {
+    // Delete image styles.
+    foreach($style_name as $value) {
+        image_style_delete(image_style_load($value));
+    }
+    
+    // Give user feedback.
+    $t = get_t();
+    drupal_set_message($t('Autoweek Racing Driver Bio styles deleted.'));
+    
+}

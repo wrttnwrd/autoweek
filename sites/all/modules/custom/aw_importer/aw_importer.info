@@ -1,0 +1,5 @@
+name = AW Importer
+description = Admin page with post-import helper functions
+core = 7.x
+package = Autoweek
+version = 7.x-0.1-dev

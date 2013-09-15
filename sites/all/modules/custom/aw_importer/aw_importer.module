@@ -1,0 +1,132 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek Importer.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function aw_importer_help($path, $arg) {
+    switch ($path) {
+        case 'admin/help#aw_importer': {
+                $ret_val = '<h3>' . t('About') . '</h3>';
+                $ret_val .= '<p>' . t('The AW Importer module is used to build out various content types post-import.  Should be uninstalled after launch.') . '</p>';
+                return $ret_val;
+                break;
+            }
+    }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function aw_importer_menu() {
+    $items = array();
+    $items['postimport'] = array(
+        'title' => 'Post-Import Helper',
+        'page callback' => 'aw_importer_page',
+        'access callback' => TRUE,
+    );
+    return $items;
+}
+
+function aw_importer_page() {
+    $pg = '';
+    $pageFunction = '';
+    if (isset($_GET['p'])) {
+        $pageFunction = $_GET['p'];
+    }
+
+    $pg = $pg . '<div style="float:left; padding: 10px; height:210px; border-right: 1px solid #000;"><b>Article Functions:</b><ul>';
+    $pg = $pg . '<li><a href="?q=postimport&p=d">x - Add Taxonomy to Articles</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=d">x - Add Drivers to Articles</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=d">x - Add Paragraphs, Images, Galleries and Videos to Articles</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=d">x - Add Images to Galleries</a></li>';
+    $pg = $pg . '</ul></div>';
+
+    $pg = $pg . '<div style="float:left; padding: 10px; height:210px; border-right: 1px solid #000;"><b>Racing Functions:</b><ul>';
+    $pg = $pg . '<li><a href="?q=postimport&p=rd">Add Series/Class to Drivers</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=ret">Add Series/Class to Events</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=rt">Add Series/Class to Tracks</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=rdb">Add Driver Bios to Drivers</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=rte">Add Tracks to Events</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=rlt">Add Locations to Tracks</a></li>';
+    $pg = $pg . '</ul></div>';
+    
+    $pg = $pg . '<div style="float:left; height:210px; padding: 10px;"><b>Shopping Functions:</b><ul>';
+    $pg = $pg . '<li><a href="?q=postimport&p=ssc">Add Store to Company</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=sscp">Add Store/Category to Product</a></li>';
+    $pg = $pg . '<li><a href="?q=postimport&p=scp">Add Company to Product</a></li>';
+    $pg = $pg . '</ul></div>';
+
+    $pg = $pg . '<div style="clear:both;"></div>';
+
+    switch ($pageFunction) {
+        case 'rd';
+            $pg = $pg . '<h2>Add Series/Class to Drivers</h2>';
+            //Load aw_importer.add_racing_series_to_node.inc include file.
+            module_load_include('inc', 'aw_importer', 'includes/aw_importer.add_racing_series_to_node');
+            $pg = $pg . _aw_importer_addRacingSeriesToNode('awr_driver', 'awr_driver_legacy_seriesid', 'awr_driver_legacy_classid', 'awr_driver_class');
+            break;
+        case 'ret':
+            $pg = $pg . '<h2>Add Series/Class to Events</h2>';
+            //Load aw_importer.add_racing_series_to_node.inc include file.
+            module_load_include('inc', 'aw_importer', 'includes/aw_importer.add_racing_series_to_node');
+            $pg = $pg . _aw_importer_addRacingSeriesToNode('awr_event', 'awr_event_legacy_series_id', 'awr_event_legacy_class_id', 'awr_event_class');
+            break;
+        case 'rt':
+            $pg = $pg . '<h2>Add Series/Class to Tracks</h2>';
+            //Load aw_importer.add_racing_series_to_node.inc include file.
+            module_load_include('inc', 'aw_importer', 'includes/aw_importer.add_racing_series_to_node');
+            $pg = $pg . _aw_importer_addRacingSeriesToNode('awr_track', 'awr_track_legacy_series_id', 'awr_track_legacy_class_id', 'awr_track_class');
+            break;
+        case 'rdb':
+            $pg = $pg . '<h2>Add Driver Bios to Drivers</h2>';
+            //Load aw_importer.add_node_to_node.inc include file.
+            module_load_include('inc', 'aw_importer', 'includes/aw_importer.add_node_to_node');
+            $pg = $pg . aw_importer_addNodeToNode('awr_driver', 'awr_driver_bio', 'title', '', 'title', '', 'awr_driver_bio_ref');
+            break;
+        case 'rte':
+            $pg = $pg . '<h2>Add Tracks to Events</h2>';
+            //Load aw_importer.add_node_to_node.inc include file.
+            module_load_include('inc', 'aw_importer', 'includes/aw_importer.add_node_to_node');
+            $pg = $pg . aw_importer_addNodeToNode('awr_event', 'awr_track', 'awr_event_legacy_track_id', 'value', 'awr_track_legacy_track_id', 'value', 'awr_event_track');
+            break;
+        case 'rlt':
+            $pg = $pg . '<h2>Add Locations to Tracks</h2>';
+            //Load aw_importer.add_node_to_node.inc include file.
+            module_load_include('inc', 'aw_importer', 'includes/aw_importer.add_node_to_node');
+            $pg = $pg . aw_importer_addNodeToNode('awr_track', 'awr_location', 'awr_track_legacy_location_id', 'value', 'awr_location_legacy_location_id', 'value', 'awr_track_location');
+            break;
+        
+        case 'ssc':
+            $pg = $pg . '<h2>Add Store to Company</h2>';
+            //Load aw_importer.add_store_to_node.inc include file.
+            module_load_include('inc', 'aw_importer', 'includes/aw_importer.add_store_to_node');
+            $pg = $pg . _aw_importer_addStoreToNode('aws_company', 'aws_company_legacy_store', 'aws_company_store');
+            break;
+        case 'sscp':
+            $pg = $pg . '<h2>Add SEMA Store/Category to Product</h2>';
+            //Load aw_importer.add_store_category_to_product.inc include file.
+            module_load_include('inc', 'aw_importer', 'includes/aw_importer.add_store_category_to_product');
+            $pg = $pg . _aw_importer_addStoreCategoryToProduct('aws_product', 'aws_product_legacy_store', 'aws_product_legacy_category', 'aws_product_store_category');
+            break;
+        case 'scp':
+            $pg = $pg . '<h2>Add Company to Product</h2>';
+            //Load aw_importer.add_node_to_node.inc include file.
+            module_load_include('inc', 'aw_importer', 'includes/aw_importer.add_node_to_node');
+            $pg = $pg . aw_importer_addNodeToNode('aws_product', 'aws_company', 'aws_product_nforgid', 'value', 'aws_company_nforgid', 'value', 'aws_product_company_ref');
+            break;
+    }
+
+    return $pg;
+}
+
+/*
+ * Return a given property/language combo if it exists.  Otherwise return an empty string.
+ */
+function _aw_importer_retprop($arr, $lang, $val) {
+    return isset($arr[$lang][0][$val]) ? $arr[$lang][0][$val] : "";
+}

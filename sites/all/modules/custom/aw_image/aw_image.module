@@ -1,0 +1,135 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek image.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function aw_image_help($path, $arg) {
+    switch($path) {
+        case 'admin/help#aw_image':{
+            $ret_val = '<h3>' . t('About') . '</h3>';
+            $ret_val .= '<p>' . t('The AW Image module is used to manage the custom Autoweek image content type.') . '</p>';
+            return $ret_val;
+            break;
+        }
+    }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function aw_image_menu(){
+    $items = array();
+    
+//Admin configuration group.
+$items['admin/config/aw_image'] = array(
+    'title' => 'AW Image',
+    'description' => 'Administer AW Image',
+    'access arguments' => array('administer aw image'),
+);
+//Admin configuration - Settings.
+$items['admin/config/aw_image/manage'] = array(
+    'title' => 'AW Image Settings',
+    'description' => 'Manage AW Image settings and configurations.',
+    'access arguments' => array('administer aw image'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('aw_image_admin_settings_form'),
+);
+
+return $items;
+}
+
+/**
+ * Implements hook_form().
+ */
+function aw_image_admin_settings_form($node, &$form_state) {
+    $form = array();
+    
+    $form['overview'] = array(
+        '#markup' => t('This interface allows administrators to manage general AW Image Settings'),
+        '#prefix' => '<p>',
+        '#suffix' => '</p>',
+    );
+    
+    $form['aw_image_test'] = array(
+        '#title' => t('Enable some test field'),
+        '#description' => t('When enabled, I will do nothing and you will like it.'),
+        '#type' => 'checkbox',
+        '#default_value' => variable_get('aw_image_test'),
+    );
+    
+    $form['aw_image_path'] = array(
+        '#title' => t('Image title'),
+        '#description' => t('This field holds the path to the image file (not including the root).'),
+        '#type' => 'textfield',
+        '#default_value' => variable_get('aw_image_path'),
+    );
+
+    return system_settings_form($form);
+}
+
+/**
+ * Validates Autoweek image admin settings.
+ */
+function aw_image_admin_settings_form_validate($form, &$form_state) {    
+    //shorthand for long array name
+    $imgpath = $form_state['values']['aw_image_path'];
+    
+    //validate image path format
+    if(!_aw_image_validate_signed_degreees($imgpath)) {
+        form_set_error('aw_image_path', t('Invalid image path: must be signed degree FOR TESTING ONLY ex. 2.3'));
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function aw_image_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'aw_image_node_form':{
+            $form['#validate'][] = 'aw_image_node_form_validate';
+            break;
+        }
+    }
+}
+
+/**
+ * Validates Autoweek Image content type.
+ */
+function aw_image_node_form_validate($form, &$form_state) {
+    
+    //Validate that at least an author override is entered.
+    $author_id = $form_state['values']['aw_image_author_ref'][LANGUAGE_NONE][0]['target_id'];
+    $author_txt = $form_state['values']['aw_image_author_override'][LANGUAGE_NONE][0]['value'];
+    if(!$author_id || $author_id == "user") {
+        if(!$author_txt) {
+            form_set_error('aw_image_author_override', t('If you do not include a byline author reference, you must include an author override value.'));
+        }
+    }
+}
+
+/**
+ * Implements hook_field_access
+ //
+function aw_image_field_access($op, $field, $entity_type, $entity, $account) {
+  if ($field['field_name'] == 'aw_image_legacy_url' && $op == 'edit') {
+      dpm($account);
+    // Only allow admins to edit field Legacy URL
+    return user_access('administer nodes', $account);
+  }
+
+  return TRUE;
+}*/
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function aw_image_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}

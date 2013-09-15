@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek Racing Driver.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function awr_driver_help($path, $arg) {
+    switch($path) {
+        case 'admin/help#awr_driver':{
+            $ret_val = '<h3>' . t('About') . '</h3>';
+            $ret_val .= '<p>' . t('The AWR Driver module is used to manage the custom Autoweek Racing Driver content type.') . '</p>';
+            return $ret_val;
+            break;
+        }
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function awr_driver_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'awr_driver_node_form':{
+            $form['#validate'][] = 'awr_driver_node_form_validate';
+            break;
+        }
+    }
+}
+
+/**
+ * Validates Autoweek Racing Driver content type.
+ */
+function awr_driver_node_form_validate($form, &$form_state) {
+    
+}
+
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function awr_driver_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}

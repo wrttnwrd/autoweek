@@ -1,0 +1,9 @@
+name = AWR Event
+description = A custom racing event content type for Autoweek.
+core = 7.x
+package = Autoweek
+version = 7.x-0.1-dev
+configure = admin/config/awr_event/manage
+dependencies[] = field_group
+dependencies[] = date
+dependencies[] = entityreference

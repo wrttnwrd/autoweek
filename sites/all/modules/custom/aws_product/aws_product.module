@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * @file
+ * Custom functionality for Autoweek Product.
+ */
+
+/**
+ * Implements hook_help().
+ */
+function aws_product_help($path, $arg) {
+    switch($path) {
+        case 'admin/help#aws_product':{
+            $ret_val = '<h3>' . t('About') . '</h3>';
+            $ret_val .= '<p>' . t('The AWS Product module is used to manage the custom Autoweek Product content type.') . '</p>';
+            return $ret_val;
+            break;
+        }
+    }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function aws_product_form_alter(&$form, &$form_state, $form_id) {
+    switch ($form_id) {
+        case 'aws_product_node_form':{
+            $form['#validate'][] = 'aws_product_node_form_validate';
+            break;
+        }
+    }
+}
+
+/**
+ * Validates Autoweek Product content type.
+ */
+function aws_product_node_form_validate($form, &$form_state) {
+    
+}
+
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function aws_product_ctools_plugin_api($module, $api) {
+  if ($module == 'field_group' && $api == 'field_group') {
+    return array('version' => 1);
+  }
+}

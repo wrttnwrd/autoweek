@@ -1,0 +1,11 @@
+name = AWS Product
+description = A custom content type for Autoweek Product.
+core = 7.x
+package = Autoweek
+version = 7.x-0.1-dev
+configure = admin/config/aws_product/manage
+dependencies[] = image
+dependencies[] = imagefield_tokens
+dependencies[] = field_group
+dependencies[] = inline_entity_form
+dependencies[] = entityreference

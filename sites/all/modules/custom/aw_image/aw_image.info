@@ -1,0 +1,10 @@
+name = AW Image
+description = A custom image content type for Autoweek.
+core = 7.x
+package = Autoweek
+version = 7.x-0.3-dev
+configure = admin/config/aw_image/manage
+dependencies[] = image
+dependencies[] = entityreference
+dependencies[] = imagefield_tokens
+dependencies[] = field_group

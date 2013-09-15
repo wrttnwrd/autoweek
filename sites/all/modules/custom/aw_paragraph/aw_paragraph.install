@@ -1,0 +1,177 @@
+<?php
+
+/**
+ * @file
+ * Autoweek paragraph installation v3
+ */
+
+/**
+ * Implements hook_install().
+ */
+function aw_paragraph_install() {
+    //Get localization function for installation as t() may be unavailable.
+    $t = get_t();
+    
+    
+    // Content type definition.
+    $content_type = array(
+        'type' => 'aw_paragraph',
+        'name' => $t('Paragraph'),
+        'description' => $t('An Autoweek Paragraph.'),
+        'title_label' => $t('Heading'),
+        'base' => 'node_content',
+        'custom' => TRUE,
+    );
+    
+    // Set remaining definitions with defaults.
+    $node_type = node_type_set_defaults($content_type);
+    
+    // Save the content type
+    node_type_save($node_type);
+    
+    // Create fields.
+    $fields = array();
+
+    $fields['aw_paragraph_show_heading'] = array(
+        'field_name' => 'aw_paragraph_show_heading',
+        'type' => 'list_boolean',
+        'settings' => array(
+          'allowed_values' => array(0 => 0, 1 => 1),
+        ),
+    );
+
+    $fields['aw_paragraph_sub_head'] = array(
+        'field_name' => 'aw_paragraph_sub_head',
+        'type' => 'text',
+    );
+
+    $fields['aw_paragraph_text'] = array(
+        'field_name' => 'aw_paragraph_text',
+        'type' => 'text_long',
+        'settings' => array(
+            'max_length' => 0,
+        ),
+    );
+
+    $fields['aw_paragraph_facts'] = array(
+        'field_name' => 'aw_paragraph_facts',
+        'type' => 'text_long',
+        'settings' => array(
+            'max_length' => 0,
+        ),
+    );
+
+    $fields['aw_paragraph_legacy_block_id'] = array(
+        'field_name' => 'aw_paragraph_legacy_block_id',
+        'type' => 'text',
+    );
+
+    $fields['aw_paragraph_legacy_article_id'] = array(
+        'field_name' => 'aw_paragraph_legacy_article_id',
+        'type' => 'text',
+    );
+    
+    foreach ($fields as $field) {
+        field_create_field($field);
+    }
+    
+    // Create field instances.
+    $instances = array();
+    $instances['aw_paragraph_show_heading'] = array(
+        'field_name' => 'aw_paragraph_show_heading',
+        'label' => $t('Show Heading'),
+        'description' => $t(''),
+        'widget' => array(
+            'type' => 'options_onoff',
+            'settings' => array('display_label' => 1),
+          ),
+    );
+    $instances['aw_paragraph_sub_head'] = array(
+        'field_name' => 'aw_paragraph_sub_head',
+        'label' => $t('Sub Heading'),
+        'description' => $t(''),
+        'widget' => array(
+            'type' => 'text',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['aw_paragraph_text'] = array(
+        'field_name' => 'aw_paragraph_text',
+        'label' => $t('Paragraph'),
+        'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textarea',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['aw_paragraph_facts'] = array(
+        'field_name' => 'aw_paragraph_facts',
+        'label' => $t('Facts'),
+        'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textarea',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['aw_paragraph_legacy_block_id'] = array(
+        'field_name' => 'aw_paragraph_legacy_block_id',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_paragraph_legacy_article_id'] = array(
+        'field_name' => 'aw_paragraph_legacy_article_id',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    
+    foreach ($instances as $instance) {
+        $instance['entity_type'] = 'node';
+        $instance['bundle'] = 'aw_paragraph';
+        field_create_instance($instance);
+    }
+}
+
+/**
+* Implements hook_uninstall().
+*/
+function aw_paragraph_uninstall() {
+    
+    // setup t.
+    $t = get_t();
+    
+    //Get all node ids with aw_video content type.
+    $sql_query = 'SELECT nid ';
+    $sql_query .= 'FROM {node} ';
+    $sql_query .= 'WHERE {node}.type = :type ';
+    $result = db_query($sql_query, array(':type' => 'aw_paragraph'));
+    
+    $nids = array();
+    foreach ($result as $row) {
+        $nids[] = $row->nid;
+    }
+    
+    // Delete all aw_video content.
+    node_delete_multiple($nids);
+    drupal_set_message($t('Autoweek Paragraph content removed.'));
+    
+    //Remove all fields and field instances.
+    foreach (field_info_instances('node', 'aw_paragraph') as $field_name => $instance) {
+        field_delete_instance($instance);
+    }
+    drupal_set_message($t('Autoweek Paragraph fields and field instances removed.'));
+    
+    //Delete the content type.
+    node_type_delete('aw_paragraph');
+    drupal_set_message($t('Autoweek Paragraph content type removed.'));
+    
+    //Clean up deleted fields.
+    field_purge_batch(1000);
+}

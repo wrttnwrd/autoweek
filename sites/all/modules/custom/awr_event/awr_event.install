@@ -1,0 +1,602 @@
+<?php
+
+/**
+ * @file
+ * Autoweek Racing Event installation
+ */
+
+/**
+ * Implements hook_install().
+ */
+function awr_event_install() {
+    //Get localization function for installation as t() may be unavailable.
+    $t = get_t();
+        
+    // Content type definition.
+    $content_type = array(
+        'type' => 'awr_event',
+        'name' => $t('Racing Event'),
+        'description' => $t('An Autoweek Racing Event.'),
+        'title_label' => $t('Event Name'),
+        'base' => 'node_content',
+        'custom' => TRUE,
+    );
+    
+    // Set remaining definitions with defaults.
+    $node_type = node_type_set_defaults($content_type);
+    
+    // Save the content type
+    node_type_save($node_type);
+    
+    // Add a field for the body
+    //node_add_body_field($node_type, $t('Description'));
+    
+    // Create fields.
+    $fields = array();
+    
+    //start group 1
+    $fields['awr_event_class'] = array(
+        'field_name' => 'awr_event_class',
+        'type' => 'taxonomy_term_reference',
+        'weight' => 1,
+        'settings' => array(
+            'allowed_values' => array(
+               array(
+                'vocabulary' => 'racing_series',
+                'parent' => 0,
+               ),
+             ),
+           ),
+        'cardinality' => 1,
+    );
+    $fields['awr_event_channel'] = array(
+        'field_name' => 'awr_event_channel',
+        'type' => 'taxonomy_term_reference',
+        'weight' => 1,
+        'settings' => array(
+            'allowed_values' => array(
+               array(
+                'vocabulary' => 'racing_channel',
+                'parent' => 0,
+               ),
+             ),
+           ),
+        'cardinality' => 1,
+    );
+    $fields['awr_event_start'] = array(
+        'field_name' => 'awr_event_start',
+        'type' => 'date',
+        'weight' => 3,
+        'settings' => array(
+            'granularity' => array(
+                'year' => 'year',
+                'month' => 'month',
+                'day' => 'day',
+                'hour' => 'hour',
+                'minute' => 'minute',
+            ),
+        ),
+    );
+    $fields['awr_event_end'] = array(
+        'field_name' => 'awr_event_end',
+        'type' => 'date',
+        'weight' => 4,
+        'settings' => array(
+            'granularity' => array(
+                'year' => 'year',
+                'month' => 'month',
+                'day' => 'day',
+                'hour' => 'hour',
+                'minute' => 'minute',
+            ),
+        ),
+    );
+    $fields['awr_event_laps'] = array(
+        'field_name' => 'awr_event_laps',
+        'type' => 'number_integer',
+        'weight' => 5,
+    );
+    $fields['awr_event_shape'] = array(
+        'field_name' => 'awr_event_shape',
+        'type' => 'text',
+        'weight' => 6,
+    );
+    $fields['awr_event_telecast'] = array(
+        'field_name' => 'awr_event_telecast',
+        'type' => 'text',
+        'weight' => 7,
+    );
+    $fields['awr_event_week'] = array(
+        'field_name' => 'awr_event_week',
+        'type' => 'number_integer',
+        'weight' => 8,
+    );
+    $fields['awr_event_purse'] = array(
+        'field_name' => 'awr_event_purse',
+        'type' => 'number_decimal',
+        'weight' => 9,
+        'settings' => array(
+            'precision' => 11,
+            'scale' => 2,
+        ),
+    );
+    $fields['awr_event_track'] = array(
+        'field_name' => 'awr_event_track',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 10,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_track' => 'awr_track',
+                ),
+            ),
+        ),
+    );
+    $fields['awr_event_season'] = array(
+        'field_name' => 'awr_event_season',
+        'type' => 'number_integer',
+        'weight' => 11,
+    );
+    
+    //start group 2
+    $fields['awr_event_drivers'] = array(
+        'field_name' => 'awr_event_drivers',
+        'cardinality' => -1,
+        'type' => 'entityreference',
+        'weight' => 12,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_driver' => 'awr_driver',
+                ),
+            ),
+        ),
+    );
+    
+    //start group 3
+    $fields['awr_event_legacy_id'] = array(
+        'field_name' => 'awr_event_legacy_id',
+        'type' => 'text',
+        'weight' => 13,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['awr_event_legacy_track_id'] = array(
+        'field_name' => 'awr_event_legacy_track_id',
+        'type' => 'text',
+        'weight' => 14,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['awr_event_legacy_series_id'] = array(
+        'field_name' => 'awr_event_legacy_series_id',
+        'type' => 'text',
+        'weight' => 15,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['awr_event_legacy_class_id'] = array(
+        'field_name' => 'awr_event_legacy_class_id',
+        'type' => 'text',
+        'weight' => 16,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    
+    //start group 4
+    $fields['awr_event_avg_speed'] = array(
+        'field_name' => 'awr_event_avg_speed',
+        'type' => 'number_decimal',
+        'weight' => 17,
+        'settings' => array(
+            'precision' => 6,
+            'scale' => 3,
+        ),
+    );
+    $fields['awr_event_avg_speed_gt'] = array(
+        'field_name' => 'awr_event_avg_speed_gt',
+        'type' => 'number_decimal',
+        'weight' => 18,
+        'settings' => array(
+            'precision' => 6,
+            'scale' => 3,
+        ),
+    );
+    $fields['awr_event_lead_changes'] = array(
+        'field_name' => 'awr_event_lead_changes',
+        'type' => 'number_integer',
+        'weight' => 19,
+    );
+    $fields['awr_event_cautions'] = array(
+        'field_name' => 'awr_event_cautions',
+        'type' => 'number_integer',
+        'weight' => 20,
+    );
+/* 
+ * $fields['awr_event_best_lap_speed'] = array(
+        'field_name' => 'awr_event_best_lap_speed',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 21,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_event' => 'awr_event',
+                ),
+            ),
+        ),
+    );
+    $fields['awr_event_best_lap_time'] = array(
+        'field_name' => 'awr_event_best_lap_time',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 22,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_event' => 'awr_event',
+                ),
+            ),
+        ),
+    );
+    $fields['awr_event_best_lap_driver'] = array(
+        'field_name' => 'awr_event_best_lap_driver',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 23,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_event' => 'awr_event',
+                ),
+            ),
+        ),
+    );
+    $fields['awr_event_best_lap_driver_gt'] = array(
+        'field_name' => 'awr_event_best_lap_driver_gt',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 24,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler' => 'base',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_event' => 'awr_event',
+                ),
+            ),
+        ),
+    );
+*/
+    $fields['awr_event_margin_victory'] = array(
+        'field_name' => 'awr_event_margin_victory',
+        'type' => 'number_decimal',
+        'weight' => 25,
+        'settings' => array(
+            'precision' => 7,
+            'scale' => 4,
+        ),
+    );
+    $fields['awr_event_race_time'] = array(
+        'field_name' => 'awr_event_race_time',
+        'type' => 'text',
+        'weight' => 26,
+    );
+    
+    foreach ($fields as $field) {
+        field_create_field($field);
+    }
+    
+    // Create field instances.
+    $instances = array();
+
+    //start group 1
+    $instances['awr_event_class'] = array(
+        'field_name' => 'awr_event_class',
+        'label' => $t('Series - Class'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'options_select',
+        ),
+    );
+    $instances['awr_event_channel'] = array(
+        'field_name' => 'awr_event_channel',
+        'label' => $t('Channel'),
+        'widget' => array(
+            'type' => 'options_select',
+        ),
+    );
+    $instances['awr_event_start'] = array(
+        'field_name' => 'awr_event_start',
+        'label' => $t('Start Time'),
+        'widget' => array(
+            'type' => 'date_select',
+            'settings' => array(
+                'increment' => 1,
+                'input_format' => 'm/d/Y - g:i:sa',
+            ),
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+            'default_value' => 'blank',
+        ),
+    );
+    $instances['awr_event_end'] = array(
+        'field_name' => 'awr_event_end',
+        'label' => $t('End Time'),
+        'widget' => array(
+            'type' => 'date_select',
+            'settings' => array(
+                'increment' => 1,
+                'input_format' => 'm/d/Y - g:i:sa',
+                ),
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+            'default_value' => 'blank',
+        ),
+    );
+    $instances['awr_event_laps'] = array(
+        'field_name' => 'awr_event_laps',
+        'label' => $t('Number of Laps'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_event_shape'] = array(
+        'field_name' => 'awr_event_shape',
+        'label' => $t('Course Shape'),
+        'description' => $t('Type in the course\'s shape.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_event_telecast'] = array(
+        'field_name' => 'awr_event_telecast',
+        'label' => $t('Telecast Type'),
+        'description' => $t('Type in the telecast type.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_event_week'] = array(
+        'field_name' => 'awr_event_week',
+        'label' => $t('Week / Event Number'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_event_purse'] = array(
+        'field_name' => 'awr_event_purse',
+        'label' => $t('Purse'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_event_track'] = array(
+        'field_name' => 'awr_event_track',
+        'label' => $t('Track'),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );
+    $instances['awr_event_season'] = array(
+        'field_name' => 'awr_event_season',
+        'label' => $t('Racing Season'),
+        'required' => TRUE,
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    
+    //start group 2
+    $instances['awr_event_drivers'] = array(
+        'field_name' => 'awr_event_drivers',
+        'label' => $t('Drivers'),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );
+    
+    //start group 3
+    $instances['awr_event_legacy_id'] = array(
+        'field_name' => 'awr_event_legacy_id',
+        'label' => $t('Legacy Event ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_event_legacy_track_id'] = array(
+        'field_name' => 'awr_event_legacy_track_id',
+        'label' => $t('Legacy Track ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_event_legacy_series_id'] = array(
+        'field_name' => 'awr_event_legacy_series_id',
+        'label' => $t('Legacy Series ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['awr_event_legacy_class_id'] = array(
+        'field_name' => 'awr_event_legacy_class_id',
+        'label' => $t('Legacy Class ID'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    
+    //start group 4
+    $instances['awr_event_avg_speed'] = array(
+        'field_name' => 'awr_event_avg_speed',
+        'label' => $t('Average Speed'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_event_avg_speed_gt'] = array(
+        'field_name' => 'awr_event_avg_speed_gt',
+        'label' => $t('Average Speed GT'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_event_lead_changes'] = array(
+        'field_name' => 'awr_event_lead_changes',
+        'label' => $t('Lead Changes'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_event_cautions'] = array(
+        'field_name' => 'awr_event_cautions',
+        'label' => $t('Caution Periods'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+/*
+    $instances['awr_event_best_lap_speed'] = array(
+        'field_name' => 'awr_event_best_lap_speed',
+        'label' => $t('Best Lap Speed'),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );
+ * $instances['awr_event_best_lap_time'] = array(
+        'field_name' => 'awr_event_best_lap_time',
+        'label' => $t('Best Lap Time'),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );
+ * $instances['awr_event_best_lap_driver'] = array(
+        'field_name' => 'awr_event_best_lap_driver',
+        'label' => $t('Best Lap Driver'),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );
+ * $instances['awr_event_best_lap_driver_gt'] = array(
+        'field_name' => 'awr_event_best_lap_driver_gt',
+        'label' => $t('Best Lap Driver GT'),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+            'settings' => array(
+                'match_operator' => 'CONTAINS',
+            ),
+        ),
+    );
+*/  
+    $instances['awr_event_margin_victory'] = array(
+        'field_name' => 'awr_event_margin_victory',
+        'label' => $t('Margin of Victory'),
+        'widget' => array(
+            'type' => 'number',
+        ),
+    );
+    $instances['awr_event_race_time'] = array(
+        'field_name' => 'awr_event_race_time',
+        'label' => $t('Race Time'),
+        'description' => $t('Type in the race time.  Format h:mm:ss, e.g. 1:34:52'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    
+    foreach ($instances as $instance) {
+        $instance['entity_type'] = 'node';
+        $instance['bundle'] = 'awr_event';
+        field_create_instance($instance);
+    }
+}
+
+/**
+* Implements hook_uninstall().
+*/
+function awr_event_uninstall() {
+
+    // Inform the user of the removal.
+    $t = get_t();
+    
+    //Get all node ids with awr_event content type.
+    $sql_query = 'SELECT nid ';
+    $sql_query .= 'FROM {node} ';
+    $sql_query .= 'WHERE {node}.type = :type ';
+    $result = db_query($sql_query, array(':type' => 'awr_event'));
+    
+    $nids = array();
+    foreach ($result as $row) {
+        $nids[] = $row->nid;
+    }
+    
+    // Delete all awr_event content.
+    node_delete_multiple($nids);
+    drupal_set_message($t('Autoweek Racing Event content removed.'));
+    
+    //Remove all fields and field instances.
+    foreach (field_info_instances('node', 'awr_event') as $field_name => $instance) {
+        field_delete_instance($instance);
+    }
+    drupal_set_message($t('Autoweek Racing Event fields and field instances removed.'));
+    
+    //Delete the content type.
+    node_type_delete('awr_event');
+    drupal_set_message($t('Autoweek Racing Event content type removed.'));
+        
+    //Clean up deleted fields.
+    field_purge_batch(1000);
+}

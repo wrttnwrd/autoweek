@@ -1,0 +1,9 @@
+name = AWR Track
+description = Provides interface for creating and displaying series/class specific track information.
+core = 7.x
+version = 7.x-0.1-dev
+package = Autoweek
+dependencies[] = image
+dependencies[] = imagefield_tokens
+dependencies[] = field_group
+dependencies[] = awr_location

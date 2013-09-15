@@ -1,0 +1,698 @@
+<?php
+
+/**
+ * @file
+ * Autoweek article installation v3
+ */
+
+/**
+ * Implements hook_install().
+ */
+function aw_article_install() {
+    
+    
+    //Get localization function for installation as t() may be unavailable.
+    $t = get_t();
+    
+    // Content type definition.
+    $content_type = array(
+        'type' => 'aw_article',
+        'name' => $t('Article'),
+        'description' => $t('An Autoweek Article.'),
+        'title_label' => $t('Article Title'),
+        'base' => 'node_content',
+        'custom' => TRUE,
+    );
+    
+    // Set remaining definitions with defaults.
+    $node_type = node_type_set_defaults($content_type);
+    
+    // Save the content type
+    node_type_save($node_type);
+    
+    // Add a field for the body
+    //node_add_body_field($node_type, $t('Description'));
+    
+    // Create fields.
+    $fields = array();
+    
+    
+    //Group 1 - Article Content
+     $fields['aw_article_alt_title'] = array(
+        'field_name' => 'aw_article_alt_title',
+        'type' => 'text',
+        'weight' => 1,
+    );
+    $fields['aw_article_headline'] = array(
+        'field_name' => 'aw_article_headline',
+        'type' => 'text',
+        'weight' => 2,
+    );
+    
+    $fields['aw_article_sub_headline'] = array(
+        'field_name' => 'aw_article_sub_headline',
+        'type' => 'text',
+        'weight' => 3,
+    );
+    
+    $fields['aw_article_super_headline'] = array(
+        'field_name' => 'aw_article_super_headline',
+        'type' => 'text',
+        'weight' => 4,
+    );
+    $fields['aw_article_main_image'] = array(
+        'field_name' => 'aw_article_main_image',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 5,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'aw_image' => 'aw_image',
+                ),
+            ),    
+        ),
+    );
+    $fields['aw_article_content'] = array(
+        'field_name' => 'aw_article_content',
+        'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+        'type' => 'entityreference',
+        'weight' => 6,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'aw_image' => 'aw_image',
+                    'aw_video' => 'aw_video',
+                    'aw_gallery' => 'aw_gallery',
+                    'aw_paragraph' => 'aw_paragraph',
+                    'awr_driver' => 'awr_driver',
+                    'aw_article' => 'aw_article',
+                ),
+            ),    
+        ),
+    );
+    $fields['aw_article_attachments'] = array(
+        'field_name' => 'aw_article_attachments',
+        'type' => 'file',
+        'label' => 'hidden',
+        'cardinality' => -1,
+        'settings' => array(
+            'display_field' => 1,
+            'display_default' => 1, 
+        ),
+        //Display format needs to be set in UI.  Error thrown on install if doing so programmatically.
+        //Format: PDF Reader
+        //Label: Hidden
+        //Settings: no width or height.  Leave empty to handle in css.
+        //Renderer: Direct Embed.
+        //Show download link: checked.
+    );
+    
+    //Group 2 - Taxonomy / Keywords
+    $fields['aw_article_author_ref'] = array(
+        'field_name' => 'aw_article_author_ref',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 7,
+        'settings' => array(
+            'target_type' => 'user',
+        ),
+    );
+    $fields['aw_article_author_override'] = array(
+        'field_name' => 'aw_article_author_override',
+        'type' => 'text',
+        'weight' => 8,
+    );
+    $fields['aw_article_keywords'] = array(
+        'field_name' => 'aw_article_keywords',
+        'type' => 'text_long',
+        'weight' => 9,
+        'settings' => array(
+            'max_length' => 0,
+        ),
+    );
+    
+    $fields['aw_article_primary_tag'] = array(
+        'field_name' => 'aw_article_primary_tag',
+        'type' => 'taxonomy_term_reference',
+        'weight' => 10,
+        'settings' => array(
+            'allowed_values' => array(
+               array(
+                'vocabulary' => 'taxonomy',
+                'parent' => 0,
+               ),
+             ),
+           ),
+        'cardinality' => 1,
+    );
+    $fields['aw_article_secondary_tag'] = array(
+        'field_name' => 'aw_article_secondary_tag',
+        'type' => 'taxonomy_term_reference',
+        'weight' => 11,
+        'settings' => array(
+            'allowed_values' => array(
+               array(
+                'vocabulary' => 'taxonomy',
+                'parent' => 0,
+               ),
+             ),
+           ),
+        'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    );
+    $fields['aw_article_vehicle'] = array(
+        'field_name' => 'aw_article_vehicle',
+        'type' => 'taxonomy_term_reference',
+        'weight' => 12,
+        'settings' => array(
+            'allowed_values' => array(
+              array(
+                'vocabulary' => 'vehicles',
+                'parent' => 0,
+               ),
+             ),
+           ),
+        'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+    );
+    $fields['aw_article_track_ref'] = array(
+        'field_name' => 'aw_article_track_ref',
+        'cardinality' => 1,
+        'type' => 'entityreference',
+        'weight' => 13,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'awr_track' => 'awr_track',
+                ),
+            ),    
+        ),
+    );
+    $fields['aw_article_related'] = array(
+        'field_name' => 'aw_article_related',
+        'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+        'type' => 'entityreference',
+        'weight' => 14,
+        'settings' => array(
+            'target_type' => 'node',
+            'handler_settings' => array(
+                'target_bundles' => array(
+                    'aw_article' => 'aw_article',
+                ),
+            ),    
+        ),
+    );
+    //Group 3 - Review
+    $fields['aw_article_review_sale_date'] = array(
+        'field_name' => 'aw_article_review_sale_date',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    $fields['aw_article_review_base_price'] = array(
+        'field_name' => 'aw_article_review_base_price',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    $fields['aw_article_review_tested_price'] = array(
+        'field_name' => 'aw_article_review_tested_price',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    $fields['aw_article_review_drivetrain'] = array(
+        'field_name' => 'aw_article_review_drivetrain',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    $fields['aw_article_review_output'] = array(
+        'field_name' => 'aw_article_review_output',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    $fields['aw_article_review_curb_weight'] = array(
+        'field_name' => 'aw_article_review_curb_weight',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    $fields['aw_article_review_zero_to_sixty'] = array(
+        'field_name' => 'aw_article_review_zero_to_sixty',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    $fields['aw_article_review_fuel_economy'] = array(
+        'field_name' => 'aw_article_review_fuel_economy',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    $fields['aw_article_review_obs_fuel_eco'] = array(
+        'field_name' => 'aw_article_review_obs_fuel_eco',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    $fields['aw_article_review_options'] = array(
+        'field_name' => 'aw_article_review_options',
+        'type' => 'text',
+        'weight' => 15,
+    );
+    
+    //Group 4 - Legacy
+    $fields['aw_article_legacy_slug'] = array(
+        'field_name' => 'aw_article_legacy_slug',
+        'type' => 'text',
+        'weight' => 15,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['aw_article_legacy_linked_video_1'] = array(
+        'field_name' => 'aw_article_legacy_linked_video_1',
+        'type' => 'text',
+        'weight' => 16,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['aw_article_legacy_linked_video_2'] = array(
+        'field_name' => 'aw_article_legacy_linked_video_2',
+        'type' => 'text',
+        'weight' => 17,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['aw_article_legacy_linked_video_3'] = array(
+        'field_name' => 'aw_article_legacy_linked_video_3',
+        'type' => 'text',
+        'weight' => 18,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['aw_article_legacy_article_id'] = array(
+        'field_name' => 'aw_article_legacy_article_id',
+        'type' => 'text',
+        'weight' => 19,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['aw_article_legacy_category'] = array(
+        'field_name' => 'aw_article_legacy_category',
+        'type' => 'text',
+        'weight' => 20,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['aw_article_legacy_url'] = array(
+        'field_name' => 'aw_article_legacy_url',
+        'type' => 'text',
+        'weight' => 21,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['aw_article_legacy_seo_title'] = array(
+        'field_name' => 'aw_article_legacy_seo_title',
+        'type' => 'text',
+        'weight' => 22,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    $fields['aw_article_legacy_seo_label'] = array(
+        'field_name' => 'aw_article_legacy_seo_label',
+        'type' => 'text',
+        'weight' => 23,
+        'field_permissions' => array(
+            'type' => 2,
+        ),
+    );
+    
+   
+    
+    foreach ($fields as $field) {
+        field_create_field($field);
+    }
+    
+    
+    // Create field instances.
+    $instances = array();
+    
+    
+    //Group 1 - Article Content
+        $instances['aw_article_alt_title'] = array(
+        'field_name' => 'aw_article_alt_title',
+        'label' => $t('Article Alt Title'),
+        'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    
+    $instances['aw_article_headline'] = array(
+        'field_name' => 'aw_article_headline',
+        'label' => $t('Article Headline'),
+        'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['aw_article_sub_headline'] = array(
+        'field_name' => 'aw_article_sub_headline',
+        'label' => $t('Article Sub Headline'),
+        'description' => $t('Sub headline below title.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['aw_article_super_headline'] = array(
+        'field_name' => 'aw_article_super_headline',
+        'label' => $t('Article Super Headline'),
+        'description' => $t('Article Super Headline.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['aw_article_main_image'] = array(  
+        'field_name' => 'aw_article_main_image',
+        'label' => 'Main Image',
+        'description' => $t(''),
+        'settings' => array(
+            'target_type' => 'node',
+        ),
+        'widget' => array(
+            'type' => 'inline_entity_form',
+            'settings' => array(
+                'type_settings' => array(
+                    'allow_existing' => 1,
+                ),
+            ),
+        ),
+    );
+    $instances['aw_article_content'] = array(  
+        'field_name' => 'aw_article_content',
+        'label' => 'Content',
+        'description' => $t('The content for the article.'),
+        'settings' => array(
+            'target_type' => 'node',
+        ),
+        'widget' => array(
+            'type' => 'inline_entity_form',
+            'settings' => array(
+                'type_settings' => array(
+                    'allow_existing' => 1,
+                ),
+            ),
+        ),
+    );
+    $instances['aw_article_attachments'] = array(
+        'field_name' => 'aw_article_attachments',
+        'label' => $t('Attachments'),
+        'required' => FALSE,
+        'settings' => array(
+            'file_extensions' => 'pdf',
+            'description_field' => 1,
+        ),
+    );
+    
+    //Group 2 - Taxonomy / Keywords
+    $instances['aw_article_author_ref'] = array(  
+        'field_name' => 'aw_article_author_ref',
+        'label' => 'Author Reference',
+        'description' => $t('The byline author reference.'),
+        'widget' => array(
+           'type' => 'entityreference_autocomplete',
+        ),
+        'settings' => array(
+            'target_type' => 'user',
+        ),
+    );
+    $instances['aw_article_author_override'] = array(
+        'field_name' => 'aw_article_author_override',
+        'label' => $t('Author Override Text'),
+        'description' => $t('Type in the author ONLY if you\'d like to override the author reference field.'),
+        'widget' => array(
+            'type' => 'text_textfield',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+        $instances['aw_article_keywords'] = array(
+        'field_name' => 'aw_article_keywords',
+        'label' => $t('Article Keywords'),
+        'description' => $t(''),
+        'widget' => array(
+            'type' => 'text_textarea',
+        ),
+        'settings' => array(
+            'text_processing' => 0,
+        ),
+    );
+    $instances['aw_article_primary_tag'] = array(
+        'field_name' => 'aw_article_primary_tag',
+        'label' => $t('Primary Tag'),
+        'description' => $t('Select one Primary tag.'),
+        'widget' => array(
+            'type' => 'taxonomy_autocomplete',
+        ),
+    );
+    $instances['aw_article_secondary_tag'] = array(
+        'field_name' => 'aw_article_secondary_tag',
+        'label' => $t('Secondary Tags'),
+        'description' => $t('Select the Secondary tags.'),
+        'widget' => array(
+            'type' => 'term_reference_tree',
+            'settings' => array(
+                'start_minimized' => 1,
+                'select_parents' => 1,
+                'track_list' => 1,
+            
+            ),
+        ),
+    );
+    $instances['aw_article_vehicle'] = array(
+        'field_name' => 'aw_article_vehicle',
+        'label' => $t('Vehicle'),
+        'description' => $t('Attach the vehicle.  Choosing more than 3 will disable the shopping widget.'),
+        'widget' => array(
+            'type' => 'term_reference_tree',
+            'settings' => array(
+                'start_minimized' => 1,
+                'select_parents' => 1,
+                'track_list' => 1,
+            
+            ),
+        ),
+    );
+    $instances['aw_article_track_ref'] = array(  
+        'field_name' => 'aw_article_track_ref',
+        'label' => 'Race Track',
+        'description' => $t('Attach a race track here.'),
+        'settings' => array(
+            'target_type' => 'node',
+        ),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+        ),
+    );
+    $instances['aw_article_related'] = array(  
+        'field_name' => 'aw_article_related',
+        'label' => 'Recommended Stories',
+        'description' => $t('Recommended Stories'),
+        'settings' => array(
+            'target_type' => 'node',
+        ),
+        'widget' => array(
+            'type' => 'entityreference_autocomplete',
+        ),
+    );
+    
+    //Group 3 - Review
+    $instances['aw_article_review_sale_date'] = array(
+        'field_name' => 'aw_article_review_sale_date',
+        'label' => 'On Sale',
+        'description' => $t('On Sale Date'),
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_review_base_price'] = array(
+        'field_name' => 'aw_article_review_base_price',
+        'label' => 'Base Price',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_review_tested_price'] = array(
+        'field_name' => 'aw_article_review_tested_price',
+        'label' => 'As Tested Price',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_review_drivetrain'] = array(
+        'field_name' => 'aw_article_review_drivetrain',
+        'label' => 'Drivetrain',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_review_output'] = array(
+        'field_name' => 'aw_article_review_output',
+        'label' => 'Output',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_review_curb_weight'] = array(
+        'field_name' => 'aw_article_review_curb_weight',
+        'label' => 'Curb Weight',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_review_zero_to_sixty'] = array(
+        'field_name' => 'aw_article_review_zero_to_sixty',
+        'label' => '0-60 MPH',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_review_fuel_economy'] = array(
+        'field_name' => 'aw_article_review_fuel_economy',
+        'label' => 'Fuel Economy',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_review_obs_fuel_eco'] = array(
+        'field_name' => 'aw_article_review_obs_fuel_eco',
+        'label' => 'Observed Fuel Economy',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_review_options'] = array(
+        'field_name' => 'aw_article_review_options',
+        'label' => 'Options',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    
+    //Group 4 - Legacy
+    $instances['aw_article_legacy_slug'] = array(
+        'field_name' => 'aw_article_legacy_slug',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_legacy_linked_video_1'] = array(
+        'field_name' => 'aw_article_legacy_linked_video_1',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_legacy_linked_video_2'] = array(
+        'field_name' => 'aw_article_legacy_linked_video_2',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_legacy_linked_video_3'] = array(
+        'field_name' => 'aw_article_legacy_linked_video_3',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_legacy_article_id'] = array(
+        'field_name' => 'aw_article_legacy_article_id',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_legacy_category'] = array(
+        'field_name' => 'aw_article_legacy_category',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_legacy_url'] = array(
+        'field_name' => 'aw_article_legacy_url',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_legacy_seo_title'] = array(
+        'field_name' => 'aw_article_legacy_seo_title',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    $instances['aw_article_legacy_seo_label'] = array(
+        'field_name' => 'aw_article_legacy_seo_label',
+        'widget' => array(
+            'type' => 'text',
+        ),
+    );
+    
+    
+    
+    
+    foreach ($instances as $instance) {
+        $instance['entity_type'] = 'node';
+        $instance['bundle'] = 'aw_article';
+        field_create_instance($instance);
+    }
+}
+
+/**
+* Implements hook_uninstall().
+*/
+function aw_article_uninstall() {
+
+    $t = get_t();
+    
+    //Get all node ids with aw_image content type.
+    $sql_query = 'SELECT nid ';
+    $sql_query .= 'FROM {node} ';
+    $sql_query .= 'WHERE {node}.type = :type ';
+    $result = db_query($sql_query, array(':type' => 'aw_article'));
+    
+    $nids = array();
+    foreach ($result as $row) {
+        $nids[] = $row->nid;
+    }
+    
+    // Delete all aw_image content.
+    node_delete_multiple($nids);
+    drupal_set_message($t('Autoweek Article content removed.'));
+    
+    //Remove all fields and field instances.
+    foreach (field_info_instances('node', 'aw_article') as $field_name => $instance) {
+        field_delete_instance($instance);
+    }
+    drupal_set_message($t('Autoweek Article fields and field instances removed.'));
+    
+    //Delete the content type.
+    node_type_delete('aw_article');
+    drupal_set_message($t('Autoweek Article content type removed.'));
+    
+    //Clean up deleted fields.
+    field_purge_batch(1000);
+}

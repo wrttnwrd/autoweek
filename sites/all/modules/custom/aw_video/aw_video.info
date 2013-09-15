@@ -1,0 +1,9 @@
+name = AW Video
+description = A custom video content type for Autoweek.
+core = 7.x
+package = Autoweek
+version = 7.x-0.3-dev
+configure = admin/config/aw_video/manage
+dependencies[] = image
+dependencies[] = entityreference
+dependencies[] = field_group

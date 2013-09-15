@@ -1,0 +1,74 @@
+/*
+    Document   : awr_result.manager
+    Created on : May 29, 2013, 10:53:33 AM
+    Author     : Adam
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+#main, #content {
+    width: 100% !important;
+}
+
+#drivers{
+    margin-right: 260px;
+}
+
+.selectEvent{
+    color:#0071B3;
+    text-decoration: none;
+    cursor:pointer;
+}
+
+.selectEvent:hover{
+    color:#018fe2;
+    text-decoration: underline;
+}
+
+.eventDataTable{
+    width: inherit;
+}
+
+.entryCell{
+    text-align: center;
+}
+
+.statusBox{
+    width: 160px;
+    font-weight: bold;
+    text-align:left;
+    display:inline;
+}
+
+.resultBox{
+    width: 30px;
+    font-weight: bold;
+    text-align:center;
+}
+
+.disabled{
+    opacity: 0.25;
+}
+
+.floater{
+    width: 250px;
+    position: fixed;
+    top: 100px;
+    right: 10px;
+    border: 2px solid #000000;
+    background: #ffffff;
+}
+
+.floaterHeader, .floaterFooter{
+    font-weight: bold;
+    padding: 5px;
+    text-align:center;
+    color: #ffffff;
+    background: #757575;
+}
+
+.floaterBody{
+    height: 400px;
+    padding: 5px;
+    overflow: auto;
+}
