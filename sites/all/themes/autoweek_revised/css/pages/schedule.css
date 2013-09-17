@@ -1,0 +1,14 @@
+/* line 3, ../../sass/pages/schedule.scss */
+.schedule .race-data { font-weight: bold; }
+/* line 7, ../../sass/pages/schedule.scss */
+.schedule .side-results td { line-height: 0.2em; }
+@media only screen and (width: 768px) { /* line 13, ../../sass/pages/schedule.scss */
+  .schedule .side-left { float: left; padding-right: 1.1em; } }
+@media only screen and (max-width: 480px) { /* line 21, ../../sass/pages/schedule.scss */
+  .schedule .side-left { width: 95%; }
+  /* line 25, ../../sass/pages/schedule.scss */
+  .schedule .side-stories { width: 85%; } }
+@media only screen and (min-width: 350px) and (max-width: 500px) { /* line 33, ../../sass/pages/schedule.scss */
+  .schedule .side-container { padding-left: 4.5em; } }
+
+/* End of Schedule */

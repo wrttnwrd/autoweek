@@ -1,0 +1,102 @@
+/* line 1, ../../sass/pages/sema-landing.scss */
+.sema-landing { /*****************
+*
+*  MEDIA QUERIES
+*
+******************/ /* end media query */ /* end media query */ }
+/* line 3, ../../sass/pages/sema-landing.scss */
+.sema-landing ul { padding: 0; }
+/* line 7, ../../sass/pages/sema-landing.scss */
+.sema-landing .tiny { color: #808285; font-size: 0.8em; }
+/* line 12, ../../sass/pages/sema-landing.scss */
+.sema-landing .outer-wrap { width: 97%; margin: 0 auto; max-width: 1200px; }
+/* line 18, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-hdr { background: #e6e6e6; padding: 10px; }
+/* line 23, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-slider-content { background: #e6e6e6; padding: 20px; }
+/* line 28, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-slider-hdr { color: black; }
+/* line 32, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-slider-featured { margin-left: -10px; }
+/* line 36, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-productList { margin-top: 10em; }
+/* line 40, ../../sass/pages/sema-landing.scss */
+.sema-landing .rsNav.rsBullets { background: #e6e6e6; width: 40%; }
+/* line 45, ../../sass/pages/sema-landing.scss */
+.sema-landing .rsDefault .rsGCaption { background: #e6e6e6 !important; bottom: 1em; padding: 10px 10px 20px 10px; }
+/* line 51, ../../sass/pages/sema-landing.scss */
+.sema-landing .rsOverflow { margin-bottom: 0; }
+/* line 55, ../../sass/pages/sema-landing.scss */
+.sema-landing .rsDefault .rsBullet { padding: 6px 15px 6px 15px; }
+/* line 59, ../../sass/pages/sema-landing.scss */
+.sema-landing .rsDefault .rsBullet span { background: #777; }
+/* line 63, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-cat { padding-left: 20px; }
+/* line 67, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-cat li { list-style-type: square; color: #297196; font-weight: 500; font-family: "Oswald", Helvetica, Arial, sans-serif; }
+/* line 74, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-cat li a { color: black; }
+/* line 78, ../../sass/pages/sema-landing.scss */
+.sema-landing hr { color: #e6e6e6; margin-left: -2em; }
+/* line 83, ../../sass/pages/sema-landing.scss */
+.sema-landing .cat-second { margin-top: -0.6em; }
+/* line 87, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-about h3 { font-family: "Oswald", Helvetica, Arial, sans-serif; text-transform: uppercase; }
+/* line 92, ../../sass/pages/sema-landing.scss */
+.sema-landing .sema-landing-about p { font-size: 0.8em; }
+@media only screen and (min-width: 768px) { /* line 104, ../../sass/pages/sema-landing.scss */
+  .sema-landing .sema-landing-hdr { margin-top: 1.5em; margin-left: -9px; }
+  /* line 109, ../../sass/pages/sema-landing.scss */
+  .sema-landing .rsNav.rsBullets { bottom: -8.5em; left: 11em; }
+  /* line 114, ../../sass/pages/sema-landing.scss */
+  .sema-landing .sema-landing-list { width: 50%; }
+  /* line 118, ../../sass/pages/sema-landing.scss */
+  .sema-landing .sema-landing-cat li { padding: 10px; }
+  /* line 122, ../../sass/pages/sema-landing.scss */
+  .sema-landing .cat-first, .sema-landing .cat-second { margin-top: 0; }
+  /* line 126, ../../sass/pages/sema-landing.scss */
+  .sema-landing .cat-second { float: right; }
+  /* line 130, ../../sass/pages/sema-landing.scss */
+  .sema-landing .sema-landing-about { width: 100%; border-top: 1px solid #e6e6e6; }
+  /* line 135, ../../sass/pages/sema-landing.scss */
+  .sema-landing hr { display: none; } }
+@media only screen and (min-width: 980px) { /* line 1, ../../sass/pages/sema-landing.scss */
+  .sema-landing { /*
+.rsDefault .rsGCaption {
+	width: 24.5%;
+	left: -17.8em;
+	top: -34.7em;
+	height: 32.5em;
+}
+
+.rsNav.rsBullets {
+	bottom: 0;
+	left: -16.1em;
+	width: 20%;
+
+} 
+*/ }
+  /* line 143, ../../sass/pages/sema-landing.scss */
+  .sema-landing .sema-landing-slider-featured { width: 60%; float: left; }
+  /* line 162, ../../sass/pages/sema-landing.scss */
+  .sema-landing .sema-landing-productList { margin-top: 3.5em; }
+  /* line 166, ../../sass/pages/sema-landing.scss */
+  .sema-landing .sema-landing-list { width: 33.3333%; }
+  /* line 170, ../../sass/pages/sema-landing.scss */
+  .sema-landing .sema-landing-about { width: 33.3333%; border-top: none; margin-left: 2em; }
+  /* line 176, ../../sass/pages/sema-landing.scss */
+  .sema-landing .sema-landing-about h3 { margin-top: 0; }
+  /* line 180, ../../sass/pages/sema-landing.scss */
+  .sema-landing .cat-second { float: none; } }
+@media (max-width: 320px) { /* line 189, ../../sass/pages/sema-landing.scss */
+  .sema-landing .rsNav.rsBullets { bottom: -15em; left: 7%; width: 80%; } }
+@media (min-width: 480px) and (max-width: 767px) { /* line 198, ../../sass/pages/sema-landing.scss */
+  .sema-landing .rsNav.rsBullets { bottom: -11.5em; left: 29%; } }
+@media (min-width: 768px) and (max-width: 979px) { /* line 206, ../../sass/pages/sema-landing.scss */
+  .sema-landing .rsNav.rsBullets { bottom: -8.5em; left: 29%; } }
+@media (min-width: 980px) and (max-width: 1206px) { /* line 214, ../../sass/pages/sema-landing.scss */
+  .sema-landing .rsNav.rsBullets { bottom: -10.2em; left: 25%; } }
+@media (min-width: 1207px) and (max-width: 1280px) { /* line 221, ../../sass/pages/sema-landing.scss */
+  .sema-landing .rsNav.rsBullets { bottom: -8em; left: 25%; } }
+
+/* end sema-landing */

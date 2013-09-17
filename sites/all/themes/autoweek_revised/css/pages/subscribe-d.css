@@ -1,0 +1,68 @@
+/* line 1, ../../sass/pages/subscribe-d.scss */
+.subscribe-d { /* end 320 query */ /* end 768 query */ /* end 980 query */ /* end 1159 query */ }
+/* line 3, ../../sass/pages/subscribe-d.scss */
+.subscribe-d ul { padding: 0; }
+/* line 7, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .outer-wrap { max-width: 1200px; }
+/* line 9, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .subscribe-email-input { width: 64%; }
+/* line 13, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .story.social ul { margin-left: -0.3em; }
+/* line 17, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .subscribe-hdr { background: #e6e6e6; padding: 10px; text-transform: uppercase; }
+/* line 23, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .subscribe-sub-hdr { font-size: 1.3em; }
+/* line 27, ../../sass/pages/subscribe-d.scss */
+.subscribe-d h4 { text-transform: uppercase; }
+/* line 31, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .subscribe-benefits li:before { content: ">>  "; color: #297196; }
+/* line 36, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .subscribe-benefits li { list-style: none; margin-bottom: 0.5em; }
+/* line 41, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .subscribe-store-link { margin-bottom: 0; }
+/* line 45, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .subscribe-download-btn { color: white; background: #297196; border: none; font-family: "Oswald", Helvetica, Arial, sans-serif; font-weight: 700; padding: 0.3em 0.6em; font-size: 0.9em; -webkit-font-smoothing: antialiased; }
+/* line 56, ../../sass/pages/subscribe-d.scss */
+.subscribe-d .subscribe-download-image { vertical-align: middle; padding-left: 5px; }
+@media only screen and (min-width: 320px) { /* line 64, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .outer-wrap { margin-right: 1em; }
+  /* line 67, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .pure-u-1-2 { margin: 0em 0em 2em 0.5em; }
+  /* line 71, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .pure-u-1-3 { margin-right: 0; margin-left: 0.5em; }
+  /* line 76, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .story.newsletter.sb.right { border-top: 1px solid #cccccc; float: none; width: 100%; }
+  /* line 82, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .story.social { border-top: 1px solid #cccccc; }
+  /* line 86, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .subscribe-download-image { margin-top: -4px; } }
+@media only screen and (min-width: 768px) { /* line 94, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .pure-g-r { margin-top: 1em; }
+  /* line 98, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .pure-u-1-8 { width: 19.5%; }
+  /* line 102, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .subscribe-logo { margin-top: 1em; }
+  /* line 106, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .pure-u-1-2 { margin: 1em 0 2em 2em; width: 76%; }
+  /* line 111, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .pure-u-1-3 { width: 100%; }
+  /* line 115, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .story.newsletter.sb.right { float: left; width: 48%; }
+  /* line 120, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .story.social { padding-top: 17px; } }
+@media only screen and (min-width: 980px) { /* line 128, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .outer-wrap { margin: 0 auto; }
+  /* line 132, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .pure-u-1-8 { width: 15.5%; }
+  /* line 136, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .pure-u-1-2 { margin: 0 2em 2em 2em; width: 47%; }
+  /* line 141, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .pure-u-1-3 { margin-right: -2em; width: 33.3333%; }
+  /* line 146, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .story.newsletter.sb.right { border-top: none; float: none; width: 100%; }
+  /* line 152, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .story.newsletter.sb.right h2 { margin-top: 3px; padding-top: 0; } }
+@media only screen and (min-width: 1159px) { /* line 161, ../../sass/pages/subscribe-d.scss */
+  .subscribe-d .outer-wrap { width: 1200px; } }
+
+/* end subscribe digital */

@@ -1,0 +1,19 @@
+/* line 2, ../sass/media-600.scss */
+.gallery .prev, .gallery .next { top: 42%; }
+
+/* line 8, ../sass/media-600.scss */
+.video .play { top: 30%; left: 40%; }
+
+/* line 15, ../sass/media-600.scss */
+.featured .video .play { top: 40%; left: 44%; }
+
+/* line 23, ../sass/media-600.scss */
+article.story a.img-wrap { width: 150px; }
+/* line 26, ../sass/media-600.scss */
+article.story .img-wrap + .excerpt { margin-left: 175px; }
+
+/* line 32, ../sass/media-600.scss */
+article .royalSlider { width: 100%; padding: 0 0 0; }
+
+/* line 37, ../sass/media-600.scss */
+.desktop-hidden { display: none; }
