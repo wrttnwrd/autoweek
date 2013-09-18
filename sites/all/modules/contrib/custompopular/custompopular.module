@@ -1,0 +1,90 @@
+<?php
+/**
+ * Implements hook_block_info().
+ */
+function custompopular_block_info() {
+  $blocks = array();
+  $blocks['my_block'] = array(
+    'info' => t("Editor's Choice"),
+  );
+ 
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_configure().
+ */
+function custompopular_block_configure($delta='') {
+  $form = array();
+ 
+  switch($delta) {
+    case 'my_block' :
+      // Text field form element
+      
+      $form['item_link1'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Popular item #1 URL'),
+        '#default_value' => variable_get('item_url1', ''),
+      );
+ 
+  }
+  return $form;
+}
+
+
+/**
+ * Implements hook_block_save().
+ */
+function custompopular_block_save($delta = '', $edit = array()) {
+  switch($delta) {
+    case 'my_block' :
+      // Saving the WYSIWYG text      
+      //variable_set('text_variable', $edit['text_body']['value']);
+        
+      variable_set('item_url1', $edit['item_url1']['value']);
+      
+      break;
+  }
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function custompopular_block_view($delta='') {
+  $block = array();
+ 
+  switch($delta) {
+    case 'my_block' :
+      $block['content'] = my_block_view();
+      break;
+  }
+ 
+  return $block;
+}
+ 
+/**
+ * Custom function to assemble renderable array for block content.
+ * Returns a renderable array with the block content.
+ * @return
+ *   returns a renderable array of block content.
+ */
+function my_block_view() {
+  $block = array();
+ 
+
+  $url1 = variable_get('item_url1', '');
+ 
+  // Block output in HTML with div wrapper
+  $block = array(
+
+     'url1' => array(
+      '#type' => 'markup',
+      '#markup' => $url1,
+      '#suffix' => '</div>',
+    ),
+  );
+ 
+  return $block;
+}
